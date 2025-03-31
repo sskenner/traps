@@ -58,7 +58,7 @@ const SimpleTetris: React.FC = () => {
   const [stage, setStage] = useState(createStage());
   const [currentTetromino, setCurrentTetromino] = useState(randomTetromino());
   const [nextTetromino, setNextTetromino] = useState(randomTetromino());
-  const [position, setPosition] = useState({ x: Math.floor(STAGE_WIDTH / 2) - 1, y: -1 });
+  const [position, setPosition] = useState({ x: Math.floor(STAGE_WIDTH / 2) - 2, y: -2 });
   const [score, setScore] = useState(0);
   const [rows, setRows] = useState(0);
   const [level, setLevel] = useState(0);
@@ -75,11 +75,17 @@ const SimpleTetris: React.FC = () => {
         const stageX = x + col;
         const stageY = y + row;
 
+        // Allow pieces to exist partially above the stage
         if (stageX < 0 || stageX >= STAGE_WIDTH || stageY >= STAGE_HEIGHT) {
           return true;
         }
 
+        // Only check collision if the piece is within stage bounds
         if (stageY >= 0 && stage[stageY] && stage[stageY][stageX] === 2) {
+          // If collision occurs at spawn height, it's game over
+          if (y <= 0) {
+            return true;
+          }
           return true;
         }
       }
@@ -221,8 +227,9 @@ const SimpleTetris: React.FC = () => {
     const newPiece = nextTetromino;
     const pieceWidth = newPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - pieceWidth) / 2);
+    const startY = -2;  // Start higher to give more space
     
-    if (checkCollision(startX, -1, newPiece.shape)) {
+    if (checkCollision(startX, startY, newPiece.shape)) {
       setGameOver(true);
       setDropTime(null);
       return;
@@ -230,7 +237,7 @@ const SimpleTetris: React.FC = () => {
 
     setCurrentTetromino(newPiece);
     setNextTetromino(randomTetromino());
-    setPosition({ x: startX, y: -1 });
+    setPosition({ x: startX, y: startY });
   };
 
   // Move the tetromino
