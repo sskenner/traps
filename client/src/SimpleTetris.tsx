@@ -26,12 +26,13 @@ const SimpleTetris: React.FC = () => {
     console.log('Resetting player');
     const newTetromino = randomTetromino();
     
-    setPlayer({
+    setPlayer(prev => ({
       pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
       tetromino: TETROMINOS[nextPiece] as TetrominoType,
       collided: false,
-    });
+    }));
     
+    console.log('New tetromino will be:', newTetromino);
     setNextPiece(newTetromino);
   }, [nextPiece]);
   
@@ -130,6 +131,8 @@ const SimpleTetris: React.FC = () => {
   
   // Drop the player piece one row
   const drop = () => {
+    console.log('Dropping piece', { playerPos: player.pos, collided: player.collided });
+    
     // Increase level when player has cleared 10 rows
     if (rows > (level + 1) * 10) {
       setDropTime(1000 / (level + 2) + 200);
@@ -137,15 +140,19 @@ const SimpleTetris: React.FC = () => {
     }
     
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+      console.log('No collision detected, moving down');
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
+      console.log('Collision detected');
+      
       // Game over if collided at the top
       if (player.pos.y < 1) {
-        console.log('GAME OVER');
+        console.log('GAME OVER - collision at top');
         setGameOver(true);
         setDropTime(null);
       }
       
+      // Mark the piece as collided so it can be merged with the stage
       updatePlayerPos({ x: 0, y: 0, collided: true });
     }
   };
@@ -181,6 +188,12 @@ const SimpleTetris: React.FC = () => {
   const updateStage = useCallback(() => {
     if (!gameStarted) return;
     
+    console.log('Updating stage', { 
+      playerPos: player.pos, 
+      collided: player.collided,
+      tetromino: player.tetromino.shape 
+    });
+    
     // First flush the stage
     const newStage = stage.map(row =>
       row.map(cell => (cell[1] === 'clear' ? [0, 'clear'] : cell))
@@ -190,18 +203,28 @@ const SimpleTetris: React.FC = () => {
     player.tetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
-          newStage[y + player.pos.y][x + player.pos.x] = [
-            value,
-            `${player.collided ? 'merged' : 'clear'}`,
-          ];
+          try {
+            newStage[y + player.pos.y][x + player.pos.x] = [
+              value,
+              `${player.collided ? 'merged' : 'clear'}`,
+            ];
+          } catch (e) {
+            console.error('Error updating stage cell:', e, {
+              stageSize: { height: newStage.length, width: newStage[0]?.length },
+              attemptedPosition: { y: y + player.pos.y, x: x + player.pos.x },
+              value
+            });
+          }
         }
       });
     });
     
     // Then check if we collided
     if (player.collided) {
+      console.log('Piece has collided, resetting player and checking for completed rows');
       resetPlayer();
-      sweepRows();
+      const rowsCleared = sweepRows();
+      console.log(`Cleared ${rowsCleared} rows`);
     }
     
     setStage(newStage);
@@ -297,18 +320,26 @@ const SimpleTetris: React.FC = () => {
   // Render the game stage
   const renderStage = () => {
     return stage.map((row, y) =>
-      row.map((cell, x) => (
-        <Rect
-          key={`${x}-${y}`}
-          x={x * CELL_SIZE}
-          y={y * CELL_SIZE}
-          width={CELL_SIZE - 1}
-          height={CELL_SIZE - 1}
-          fill={cell[0] ? cell[1] : '#111'}
-          stroke="#333"
-          strokeWidth={0.5}
-        />
-      ))
+      row.map((cell, x) => {
+        // Simple coloring - empty cells are dark, filled cells are merged
+        let fillColor = '#111'; // Empty cell (default)
+        if (cell[0]) {
+          fillColor = '#666'; // Merged cell
+        }
+        
+        return (
+          <Rect
+            key={`${x}-${y}`}
+            x={x * CELL_SIZE}
+            y={y * CELL_SIZE}
+            width={CELL_SIZE - 1}
+            height={CELL_SIZE - 1}
+            fill={fillColor}
+            stroke="#333"
+            strokeWidth={0.5}
+          />
+        );
+      })
     );
   };
   

@@ -1,12 +1,12 @@
 import React from "react";
-import SimpleTetris from "./SimpleTetris";
+import BasicTetris from "./BasicTetris";
 import "@fontsource/inter";
 
 function App() {
   console.log("App component rendering");
 
   return (
-    <SimpleTetris />
+    <BasicTetris />
   );
 }
 
