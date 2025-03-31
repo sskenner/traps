@@ -20,6 +20,11 @@ const TetrisBoard: React.FC<Props> = ({
 }) => {
   console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent });
   
+  // Safety check - if we're in single player mode, ensure we don't use any multiplayer props
+  if (!isMultiplayer && (gameData || onLinesClear)) {
+    console.warn("WebSocket props passed to single player TetrisBoard - ignoring");
+  }
+  
   const { backgroundMusic, playHit, playSuccess, isMuted } = useAudio();
   const stageRef = useRef<any>(null);
   const CELL_SIZE = isOpponent ? 15 : 30;

@@ -15,25 +15,34 @@ function App() {
 
   // Initialize audio elements
   useEffect(() => {
-    if (!initialized) {
-      // Load background music
-      const bgMusic = new Audio("/sounds/background.mp3");
-      bgMusic.loop = true;
-      bgMusic.volume = 0.4;
-      setBackgroundMusic(bgMusic);
+    try {
+      if (!initialized) {
+        console.log("Initializing audio elements");
+        
+        // Load background music
+        const bgMusic = new Audio("/sounds/background.mp3");
+        bgMusic.loop = true;
+        bgMusic.volume = 0.4;
+        setBackgroundMusic(bgMusic);
 
-      // Load sound effects
-      const hit = new Audio("/sounds/hit.mp3");
-      hit.volume = 0.3;
-      setHitSound(hit);
+        // Load sound effects
+        const hit = new Audio("/sounds/hit.mp3");
+        hit.volume = 0.3;
+        setHitSound(hit);
 
-      const success = new Audio("/sounds/success.mp3");
-      success.volume = 0.5;
-      setSuccessSound(success);
+        const success = new Audio("/sounds/success.mp3");
+        success.volume = 0.5;
+        setSuccessSound(success);
 
-      setInitialized(true);
+        setInitialized(true);
+      }
+    } catch (error) {
+      console.error("Error initializing audio:", error);
     }
   }, [initialized, setBackgroundMusic, setHitSound, setSuccessSound]);
+
+  // For debugging - log when App renders
+  console.log("App component rendering");
 
   return (
     <QueryClientProvider client={queryClient}>
