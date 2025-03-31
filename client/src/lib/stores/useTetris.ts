@@ -227,7 +227,17 @@ export const useTetris = () => {
     nextPiece,
     gameStarted,
     updatePlayerPos,
-    resetPlayer,
+    resetPlayer: () => {
+      const startingPos = {
+        x: STAGE_WIDTH / 2 - 2,
+        y: -2  // Start above the visible board
+      };
+      setPlayer({
+        pos: startingPos,
+        tetromino: randomTetromino().shape,
+        collided: false
+      });
+    },
     rotatePlayer,
     dropPlayer,
     startGame,
