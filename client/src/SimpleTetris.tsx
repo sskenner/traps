@@ -294,7 +294,8 @@ const SimpleTetris: React.FC = () => {
   // Hard drop - move the tetromino all the way down
   const hardDrop = () => {
     let newY = position.y;
-    // Find the lowest position where the piece can go
+
+    // Find the lowest valid position
     while (!checkCollision(position.x, newY + 1, currentTetromino.shape)) {
       newY += 1;
     }
@@ -302,28 +303,24 @@ const SimpleTetris: React.FC = () => {
     // Update position
     setPosition(prev => ({ ...prev, y: newY }));
 
-    // Update stage immediately with the merged piece
+    // Create new stage with current piece
     const newStage = stage.map(row => [...row]);
 
     // Merge the tetromino at its final position
     currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
-          if (
-            newY + y >= 0 &&
-            newY + y < STAGE_HEIGHT &&
-            position.x + x >= 0 &&
-            position.x + x < STAGE_WIDTH
-          ) {
-            newStage[newY + y][position.x + x] = 2; // Mark as merged
+          const boardY = newY + y;
+          const boardX = position.x + x;
+          if (boardY >= 0 && boardY < STAGE_HEIGHT) {
+            newStage[boardY][boardX] = 2;
           }
         }
       });
     });
 
+    // Update stage and get new piece
     setStage(newStage);
-
-    // Get new tetromino immediately
     getNewTetromino();
   };
 
