@@ -1,280 +1,271 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
-import { TETROMINOS, randomTetromino, TetrominoType } from './lib/tetrominos';
-import { STAGE_WIDTH, STAGE_HEIGHT, createStage, checkCollision } from './lib/gameHelpers';
 
-// Simple Tetris Game with no WebSocket connections
+// Game constants
+const STAGE_WIDTH = 10;
+const STAGE_HEIGHT = 20;
+const CELL_SIZE = 30;
+
+// Tetromino shapes and colors
+const TETROMINOS = {
+  I: {
+    shape: [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+    color: '#00f0f0', // Cyan
+  },
+  J: {
+    shape: [[1, 0, 0], [1, 1, 1], [0, 0, 0]],
+    color: '#0000f0', // Blue
+  },
+  L: {
+    shape: [[0, 0, 1], [1, 1, 1], [0, 0, 0]],
+    color: '#f0a000', // Orange
+  },
+  O: {
+    shape: [[1, 1], [1, 1]],
+    color: '#f0f000', // Yellow
+  },
+  S: {
+    shape: [[0, 1, 1], [1, 1, 0], [0, 0, 0]],
+    color: '#00f000', // Green
+  },
+  T: {
+    shape: [[0, 1, 0], [1, 1, 1], [0, 0, 0]],
+    color: '#a000f0', // Purple
+  },
+  Z: {
+    shape: [[1, 1, 0], [0, 1, 1], [0, 0, 0]],
+    color: '#f00000', // Red
+  },
+};
+
+type TetrominoType = keyof typeof TETROMINOS;
+
+// Create an empty stage
+const createStage = () => 
+  Array.from(Array(STAGE_HEIGHT), () => 
+    Array(STAGE_WIDTH).fill(0)
+  );
+
+// Get a random tetromino
+const randomTetromino = () => {
+  const tetrominos = Object.keys(TETROMINOS) as TetrominoType[];
+  const randTetromino = tetrominos[Math.floor(Math.random() * tetrominos.length)];
+  return TETROMINOS[randTetromino];
+};
+
 const SimpleTetris: React.FC = () => {
+  // State
   const [stage, setStage] = useState(createStage());
-  const [player, setPlayer] = useState({
-    pos: { x: 0, y: 0 },
-    tetromino: TETROMINOS[0] as TetrominoType,
-    collided: false,
-  });
-  const [dropTime, setDropTime] = useState<number | null>(1000);
-  const [gameOver, setGameOver] = useState(false);
+  const [currentTetromino, setCurrentTetromino] = useState(randomTetromino());
+  const [nextTetromino, setNextTetromino] = useState(randomTetromino());
+  const [position, setPosition] = useState({ x: 3, y: 0 });
   const [score, setScore] = useState(0);
   const [rows, setRows] = useState(0);
   const [level, setLevel] = useState(0);
-  const [nextPiece, setNextPiece] = useState<keyof typeof TETROMINOS>('I');
+  const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  
-  const CELL_SIZE = 30;
-  
-  // Reset player
-  const resetPlayer = useCallback(() => {
-    console.log('Resetting player');
-    const newTetromino = randomTetromino();
-    
-    setPlayer(prev => ({
-      pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
-      tetromino: TETROMINOS[nextPiece] as TetrominoType,
-      collided: false,
-    }));
-    
-    console.log('New tetromino will be:', newTetromino);
-    setNextPiece(newTetromino);
-  }, [nextPiece]);
-  
-  // Start the game
-  const startGame = () => {
-    console.log('Starting game');
-    // Reset everything
-    setStage(createStage());
-    setScore(0);
-    setRows(0);
-    setLevel(0);
-    resetPlayer();
-    setGameStarted(true);
-    setGameOver(false);
-    setDropTime(1000);
-  };
-  
-  // Update player position
-  const updatePlayerPos = ({ x, y, collided }: { x: number; y: number; collided: boolean }) => {
-    setPlayer(prev => ({
-      ...prev,
-      pos: { x: (prev.pos.x + x), y: (prev.pos.y + y) },
-      collided,
-    }));
-  };
-  
-  // Rotate a tetromino
-  const rotate = (matrix: any[][], dir: number) => {
-    // Transpose rows to columns
-    const rotatedTetro = matrix.map((_, index) =>
-      matrix.map(col => col[index])
-    );
-    
-    // Reverse each row to get a rotated matrix
-    if (dir > 0) return rotatedTetro.map(row => row.reverse());
-    return rotatedTetro.reverse();
-  };
-  
-  // Rotate player tetromino
-  const rotatePlayer = (stage: any[][]) => {
-    const clonedPlayer = JSON.parse(JSON.stringify(player));
-    clonedPlayer.tetromino.shape = rotate(clonedPlayer.tetromino.shape, 1);
-    
-    // Check for collisions when rotating
-    const pos = clonedPlayer.pos.x;
-    let offset = 1;
-    
-    // Adjust position if tetromino is outside the stage boundary after rotation
-    while (checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
-      clonedPlayer.pos.x += offset;
-      offset = -(offset + (offset > 0 ? 1 : -1));
-      
-      // If offset gets too big, rotation is not possible at current position
-      if (offset > clonedPlayer.tetromino.shape[0].length) {
-        rotate(clonedPlayer.tetromino.shape, -1); // Rotate back
-        clonedPlayer.pos.x = pos;
-        return;
-      }
-    }
-    
-    setPlayer(clonedPlayer);
-  };
-  
-  // Calculate score when rows are cleared
-  const calcScore = useCallback((rowsCleared: number) => {
-    const linePoints = [0, 100, 300, 500, 800];
-    const points = linePoints[rowsCleared] * (level + 1);
-    setScore(prev => prev + points);
-    setRows(prev => prev + rowsCleared);
-  }, [level]);
-  
-  // Sweep completed rows
-  const sweepRows = useCallback(() => {
-    let rowsCleared = 0;
-    
-    setStage(prevStage => {
-      return prevStage.reduce((newStage, row) => {
-        // If row has no empty cells (all cells have values)
-        if (row.findIndex(cell => cell[0] === 0) === -1) {
-          rowsCleared += 1;
-          // Add an empty row at the top
-          newStage.unshift(new Array(prevStage[0].length).fill([0, 'clear']));
-          return newStage;
+  const [dropTime, setDropTime] = useState<number | null>(null);
+
+  // Helper function to check collisions
+  const checkCollision = (x: number, y: number, matrix: number[][]) => {
+    // Check if piece is inside the game boundaries (sides and bottom)
+    for (let row = 0; row < matrix.length; row++) {
+      for (let col = 0; col < matrix[row].length; col++) {
+        // Skip empty cells (zeros)
+        if (matrix[row][col] === 0) continue;
+        
+        // Calculate the position of the cell in the stage
+        const stageX = x + col;
+        const stageY = y + row;
+        
+        // Check if we're outside the game area or there's a collision with an existing piece
+        if (
+          stageX < 0 || 
+          stageX >= STAGE_WIDTH || 
+          stageY >= STAGE_HEIGHT ||
+          (stageY >= 0 && stage[stageY][stageX] !== 0)
+        ) {
+          return true;
         }
-        newStage.push(row);
-        return newStage;
-      }, [] as any[][]);
-    });
-    
-    if (rowsCleared > 0) {
-      calcScore(rowsCleared);
-    }
-    
-    return rowsCleared;
-  }, [calcScore]);
-  
-  // Drop the player piece one row
-  const drop = () => {
-    console.log('Dropping piece', { playerPos: player.pos, collided: player.collided });
-    
-    // Increase level when player has cleared 10 rows
-    if (rows > (level + 1) * 10) {
-      setDropTime(1000 / (level + 2) + 200);
-      setLevel(prev => prev + 1);
-    }
-    
-    if (!checkCollision(player, stage, { x: 0, y: 1 })) {
-      console.log('No collision detected, moving down');
-      updatePlayerPos({ x: 0, y: 1, collided: false });
-    } else {
-      console.log('Collision detected');
-      
-      // Game over if collided at the top
-      if (player.pos.y < 1) {
-        console.log('GAME OVER - collision at top');
-        setGameOver(true);
-        setDropTime(null);
       }
-      
-      // Mark the piece as collided so it can be merged with the stage
-      updatePlayerPos({ x: 0, y: 0, collided: true });
     }
+    return false;
   };
-  
-  // User keyboard controls
-  const movePlayer = (dir: number) => {
-    if (!checkCollision(player, stage, { x: dir, y: 0 })) {
-      updatePlayerPos({ x: dir, y: 0, collided: false });
-    }
-  };
-  
-  // Hard drop the player piece to the bottom
-  const hardDrop = () => {
-    let newY = player.pos.y;
-    const playerCopy = JSON.parse(JSON.stringify(player));
-    
-    // Find the lowest possible position without collision
-    while (!checkCollision(playerCopy, stage, { x: 0, y: 1 })) {
-      playerCopy.pos.y += 1;
-      newY += 1;
-    }
-    
-    // Move player to that position and mark as collided
-    updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
-  };
-  
-  // Drop player on keypress
-  const dropPlayer = () => {
-    drop();
-  };
-  
-  // Update game stage
-  const updateStage = useCallback(() => {
-    if (!gameStarted) return;
-    
-    console.log('Updating stage', { 
-      playerPos: player.pos, 
-      collided: player.collided,
-      tetromino: player.tetromino.shape 
-    });
-    
-    // First flush the stage
-    const newStage = stage.map(row =>
-      row.map(cell => (cell[1] === 'clear' ? [0, 'clear'] : cell))
+
+  // Update the game stage
+  const updateStage = () => {
+    // Copy the stage
+    const newStage = stage.map(row => 
+      row.map(cell => (cell === 1 ? 0 : cell))
     );
-    
-    // Then draw the tetromino
-    player.tetromino.shape.forEach((row, y) => {
+
+    // Draw the current tetromino on the stage
+    currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
-          try {
-            newStage[y + player.pos.y][x + player.pos.x] = [
-              value,
-              `${player.collided ? 'merged' : 'clear'}`,
-            ];
-          } catch (e) {
-            console.error('Error updating stage cell:', e, {
-              stageSize: { height: newStage.length, width: newStage[0]?.length },
-              attemptedPosition: { y: y + player.pos.y, x: x + player.pos.x },
-              value
-            });
+          if (
+            position.y + y >= 0 && 
+            position.y + y < STAGE_HEIGHT && 
+            position.x + x >= 0 && 
+            position.x + x < STAGE_WIDTH
+          ) {
+            newStage[position.y + y][position.x + x] = 1;
           }
         }
       });
     });
-    
-    // Then check if we collided
-    if (player.collided) {
-      console.log('Piece has collided, resetting player and checking for completed rows');
-      resetPlayer();
-      const rowsCleared = sweepRows();
-      console.log(`Cleared ${rowsCleared} rows`);
+
+    // Check if we've collided with something
+    if (checkCollision(position.x, position.y + 1, currentTetromino.shape)) {
+      // Game over if it's colliding at the top
+      if (position.y < 1) {
+        console.log('Game Over!');
+        setGameOver(true);
+        setDropTime(null);
+        return;
+      }
+
+      // Merge the tetromino into the stage
+      const mergedStage = newStage.map((row, y) =>
+        row.map((cell, x) => {
+          // Check if we're drawing an active tetromino cell here
+          const isTetroCell = 
+            position.y <= y && 
+            y < position.y + currentTetromino.shape.length && 
+            position.x <= x && 
+            x < position.x + currentTetromino.shape[0].length && 
+            currentTetromino.shape[y - position.y][x - position.x] !== 0;
+          
+          // If it's a tetromino cell and not already filled, set it to 2 (merged)
+          return isTetroCell ? 2 : cell;
+        })
+      );
+
+      // Check for completed rows
+      let rowsCleared = 0;
+      const clearedStage = mergedStage.map(row => {
+        // If every cell in the row is not empty
+        if (row.every(cell => cell !== 0)) {
+          rowsCleared += 1;
+          // Return an empty row
+          return Array(STAGE_WIDTH).fill(0);
+        }
+        return row;
+      });
+
+      // Calculate score
+      if (rowsCleared > 0) {
+        setScore(prev => prev + rowsCleared * 100 * (level + 1));
+        setRows(prev => prev + rowsCleared);
+        
+        // Increase level for every 10 rows cleared
+        if ((rows + rowsCleared) >= (level + 1) * 10) {
+          setLevel(prev => prev + 1);
+          setDropTime(1000 / (level + 2) + 200);
+        }
+      }
+
+      // Get a new tetromino and reset position
+      setCurrentTetromino(nextTetromino);
+      setNextTetromino(randomTetromino());
+      setPosition({ x: 3, y: 0 });
+      
+      // Update the stage with cleared rows
+      setStage(clearedStage);
+    } else {
+      // Simply update the stage
+      setStage(newStage);
     }
-    
-    setStage(newStage);
-  }, [gameStarted, player, resetPlayer, stage, sweepRows]);
-  
-  // Auto drop the tetromino
-  useEffect(() => {
-    let dropTimer: NodeJS.Timeout | null = null;
-    
-    if (dropTime && gameStarted && !gameOver) {
-      dropTimer = setInterval(() => {
-        drop();
-      }, dropTime);
+  };
+
+  // Move the tetromino
+  const moveTetromino = (x: number, y: number) => {
+    if (!checkCollision(position.x + x, position.y + y, currentTetromino.shape)) {
+      setPosition(prev => ({ x: prev.x + x, y: prev.y + y }));
     }
+  };
+
+  // Rotate the tetromino
+  const rotateTetromino = () => {
+    // Clone the tetromino
+    const matrix = [...currentTetromino.shape];
     
-    return () => {
-      if (dropTimer) clearInterval(dropTimer);
-    };
-  }, [dropTime, gameStarted, gameOver]);
-  
-  // Update the game stage
+    // Transpose the matrix
+    const transposed = matrix[0].map((_, i) => 
+      matrix.map(row => row[i])
+    );
+    
+    // Reverse each row to get a 90-degree rotation
+    const rotated = transposed.map(row => [...row].reverse());
+    
+    // Check if the rotation causes a collision
+    if (!checkCollision(position.x, position.y, rotated)) {
+      setCurrentTetromino({ ...currentTetromino, shape: rotated });
+    }
+  };
+
+  // Hard drop - move the tetromino all the way down
+  const hardDrop = () => {
+    let newY = position.y;
+    while (!checkCollision(position.x, newY + 1, currentTetromino.shape)) {
+      newY += 1;
+    }
+    setPosition(prev => ({ ...prev, y: newY }));
+  };
+
+  // Start the game
+  const startGame = () => {
+    setStage(createStage());
+    setScore(0);
+    setRows(0);
+    setLevel(0);
+    setCurrentTetromino(randomTetromino());
+    setNextTetromino(randomTetromino());
+    setPosition({ x: 3, y: 0 });
+    setGameOver(false);
+    setGameStarted(true);
+    setDropTime(1000);
+  };
+
+  // Update game - main game loop
   useEffect(() => {
     if (gameStarted && !gameOver) {
       const gameLoop = setInterval(() => {
         updateStage();
       }, 100);
       
-      return () => {
-        clearInterval(gameLoop);
-      };
+      return () => clearInterval(gameLoop);
     }
-  }, [gameStarted, gameOver, updateStage]);
-  
-  // Handle keyboard input for player controls
+  }, [gameStarted, gameOver, stage, position]);
+
+  // Auto drop the tetromino
+  useEffect(() => {
+    if (dropTime && gameStarted && !gameOver) {
+      const dropTimer = setInterval(() => {
+        moveTetromino(0, 1);
+      }, dropTime);
+      
+      return () => clearInterval(dropTimer);
+    }
+  }, [dropTime, gameStarted, gameOver, position]);
+
+  // Handle keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameStarted || gameOver) return;
       
       switch (e.code) {
         case 'ArrowLeft':
-          movePlayer(-1);
+          moveTetromino(-1, 0);
           break;
         case 'ArrowRight':
-          movePlayer(1);
+          moveTetromino(1, 0);
           break;
         case 'ArrowDown':
-          dropPlayer();
+          moveTetromino(0, 1);
           break;
         case 'ArrowUp':
-          rotatePlayer(stage);
+          rotateTetromino();
           break;
         case 'Space':
           hardDrop();
@@ -283,86 +274,51 @@ const SimpleTetris: React.FC = () => {
     };
     
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [gameStarted, gameOver, stage]);
-  
-  // Render the next piece display
-  const renderNextPiece = () => {
-    const tetromino = TETROMINOS[nextPiece];
-    return (
-      <div className="next-piece-container">
-        <Stage width={100} height={100}>
-          <Layer>
-            {tetromino.shape.map((row, y) =>
-              row.map((cell, x) => (
-                cell !== 0 && (
-                  <Rect
-                    key={`next-${x}-${y}`}
-                    x={30 + x * 20}
-                    y={30 + y * 20}
-                    width={19}
-                    height={19}
-                    fill={tetromino.color}
-                    stroke="#666"
-                    strokeWidth={0.5}
-                  />
-                )
-              ))
-            )}
-          </Layer>
-        </Stage>
-      </div>
-    );
-  };
-  
-  // Render the game stage
-  const renderStage = () => {
-    return stage.map((row, y) =>
-      row.map((cell, x) => {
-        // Simple coloring - empty cells are dark, filled cells are merged
-        let fillColor = '#111'; // Empty cell (default)
-        if (cell[0]) {
-          fillColor = '#666'; // Merged cell
-        }
-        
-        return (
-          <Rect
-            key={`${x}-${y}`}
-            x={x * CELL_SIZE}
-            y={y * CELL_SIZE}
-            width={CELL_SIZE - 1}
-            height={CELL_SIZE - 1}
-            fill={fillColor}
-            stroke="#333"
-            strokeWidth={0.5}
-          />
-        );
-      })
-    );
-  };
-  
-  // Render the active tetromino
-  const renderTetromino = () => {
-    return player.tetromino.shape.map((row, y) =>
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [gameStarted, gameOver, position, currentTetromino.shape]);
+
+  // Render functions
+  const renderStage = () => (
+    stage.map((row, y) => 
       row.map((cell, x) => (
-        cell !== 0 && (
-          <Rect
-            key={`player-${x}-${y}`}
-            x={(player.pos.x + x) * CELL_SIZE}
-            y={(player.pos.y + y) * CELL_SIZE}
-            width={CELL_SIZE - 1}
-            height={CELL_SIZE - 1}
-            fill={player.tetromino.color}
-            stroke="#666"
-            strokeWidth={0.5}
-          />
-        )
+        <Rect
+          key={`${x}-${y}`}
+          x={x * CELL_SIZE}
+          y={y * CELL_SIZE}
+          width={CELL_SIZE - 1}
+          height={CELL_SIZE - 1}
+          fill={cell === 0 ? '#111' : cell === 1 ? currentTetromino.color : '#666'}
+          stroke="#333"
+          strokeWidth={0.5}
+        />
       ))
-    );
-  };
-  
+    )
+  );
+
+  const renderNextTetromino = () => (
+    <Stage width={120} height={120}>
+      <Layer>
+        {nextTetromino.shape.map((row, y) =>
+          row.map((cell, x) => 
+            cell !== 0 && (
+              <Rect
+                key={`next-${x}-${y}`}
+                x={30 + x * 20}
+                y={30 + y * 20}
+                width={19}
+                height={19}
+                fill={nextTetromino.color}
+                stroke="#666"
+                strokeWidth={0.5}
+              />
+            )
+          )
+        )}
+      </Layer>
+    </Stage>
+  );
+
+  // Render the component
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900">
       <div className="mb-6">
@@ -370,15 +326,16 @@ const SimpleTetris: React.FC = () => {
       </div>
       
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="tetris-board">
+        {/* Game Board */}
+        <div className="tetris-board bg-gray-800 p-2 rounded-lg">
           <Stage width={STAGE_WIDTH * CELL_SIZE} height={STAGE_HEIGHT * CELL_SIZE}>
             <Layer>
               {renderStage()}
-              {player.tetromino && renderTetromino()}
             </Layer>
           </Stage>
         </div>
         
+        {/* Game Info & Controls */}
         <div className="w-64 flex flex-col gap-4">
           {/* Score */}
           <div className="bg-gray-800 p-4 rounded-lg">
@@ -399,17 +356,17 @@ const SimpleTetris: React.FC = () => {
           {/* Next Piece */}
           <div className="bg-gray-800 p-4 rounded-lg">
             <h2 className="text-xl font-bold text-white mb-2">Next Piece</h2>
-            {renderNextPiece()}
+            {renderNextTetromino()}
           </div>
           
           {/* Controls */}
           <div className="flex flex-col gap-2">
-            {!gameStarted ? (
+            {!gameStarted || gameOver ? (
               <button 
                 onClick={startGame}
                 className="py-3 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                Start Game
+                {gameOver ? 'Play Again' : 'Start Game'}
               </button>
             ) : (
               <button 
@@ -433,7 +390,7 @@ const SimpleTetris: React.FC = () => {
       </div>
       
       {/* Game Over Modal */}
-      {gameOver && (
+      {gameOver && gameStarted && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center">
           <div className="bg-gray-800 p-8 rounded-lg max-w-md w-full">
             <h2 className="text-2xl font-bold text-white mb-4">Game Over</h2>
