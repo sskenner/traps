@@ -102,32 +102,55 @@ const BasicTetris: React.FC = () => {
   
   // Get a new tetromino
   const getNewTetromino = useCallback(() => {
+    // Set the current tetromino to the next tetromino that was previously generated
     setCurrentTetromino(nextTetromino);
-    setNextTetromino(randomTetromino());
-    setPosition({ x: STAGE_WIDTH / 2 - 2, y: 0 });
+    
+    // Generate a new next tetromino for the preview
+    const newNextTetromino = randomTetromino();
+    setNextTetromino(newNextTetromino);
+    
+    // Calculate the start position based on the tetromino width
+    const tetrominoWidth = nextTetromino.shape[0].length;
+    const startX = Math.floor(STAGE_WIDTH / 2) - Math.floor(tetrominoWidth / 2);
+    const startY = 0; // Always start at the top
+    
+    // Update the position
+    setPosition({ x: startX, y: startY });
+    
+    console.log('New tetromino:', nextTetromino, 'at position:', { x: startX, y: startY });
   }, [nextTetromino]);
   
   // Check for collision
   const checkCollision = (x: number, y: number, tetromino: TetrominoShape): boolean => {
+    // First check that the tetromino is actually positioned in a valid place
+    if (x < 0 || y < 0) {
+      return false; // Allow negative y for pieces at the top
+    }
+    
     for (let row = 0; row < tetromino.shape.length; row++) {
       for (let col = 0; col < tetromino.shape[row].length; col++) {
-        // Check that we're on an actual tetromino cell
-        if (tetromino.shape[row][col] !== 0) {
-          // Check that our move is inside the game area's height (y)
-          // That we're not moving through the bottom of the grid
-          if (
-            // Below the bottom boundary
-            y + row >= STAGE_HEIGHT ||
-            // Outside the game area width (x)
-            x + col < 0 || x + col >= STAGE_WIDTH ||
-            // Check that the cell we're moving to isn't set
-            (stage[y + row] && stage[y + row][x + col] !== 0)
-          ) {
-            return true;
-          }
+        // Skip empty cells in the tetromino
+        if (tetromino.shape[row][col] === 0) {
+          continue;
+        }
+        
+        // Calculate the position in the stage
+        const newX = x + col;
+        const newY = y + row;
+        
+        // First check boundaries
+        if (newX < 0 || newX >= STAGE_WIDTH || newY >= STAGE_HEIGHT) {
+          return true;
+        }
+        
+        // Then check for collision with existing pieces in the stage
+        // Only if we're actually in the visible part of the stage (y >= 0)
+        if (newY >= 0 && stage[newY] && stage[newY][newX] !== 0) {
+          return true;
         }
       }
     }
+    
     return false;
   };
   
@@ -168,9 +191,10 @@ const BasicTetris: React.FC = () => {
     if (hasCollision) {
       console.log('Collision detected');
       
-      // Game over if collision at the top
-      if (position.y <= 1) {
-        console.log('GAME OVER');
+      // Game over if collision happens when the piece is still at the top
+      // This indicates the piece couldn't move down at all
+      if (position.y < 2) {
+        console.log('GAME OVER - collision at top of board');
         setGameOver(true);
         setDropTime(null);
         return;
@@ -279,16 +303,32 @@ const BasicTetris: React.FC = () => {
   // Start game
   const startGame = () => {
     console.log('Starting game');
-    setStage(createStage());
-    setCurrentTetromino(randomTetromino());
-    setNextTetromino(randomTetromino());
-    setPosition({ x: STAGE_WIDTH / 2 - 2, y: 0 });
+    // Create a completely clean stage first to avoid collision with existing blocks
+    const newStage = createStage();
+    
+    // Initialize with fresh tetrominos
+    const firstPiece = randomTetromino();
+    const secondPiece = randomTetromino();
+    
+    // Calculate the start position based on the tetromino width
+    // Position piece in the middle of the board
+    const tetrominoWidth = firstPiece.shape[0].length;
+    const startX = Math.floor(STAGE_WIDTH / 2) - Math.floor(tetrominoWidth / 2);
+    const startY = 0; // Always start at the top
+    
+    // Set initial state
+    setCurrentTetromino(firstPiece);
+    setNextTetromino(secondPiece);
+    setPosition({ x: startX, y: startY });
     setScore(0);
     setRows(0);
     setLevel(0);
     setGameOver(false);
     setGameStarted(true);
     setDropTime(1000);
+    setStage(newStage);
+    
+    console.log('Game started with piece:', firstPiece, 'at position:', { x: startX, y: startY });
   };
   
   // Update game - main game loop
