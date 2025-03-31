@@ -117,21 +117,49 @@ const SimpleTetris: React.FC = () => {
 
     // Check if we've collided with something below us
     if (checkCollision(position.x, position.y + 1, currentTetromino.shape)) {
-      // Only set game over if there's a collision at the very top of the board
-      // AND the piece hasn't had a chance to move down at all
-      // This means all of the piece is still above the board (y < 0)
-      const hasBlocksAboveBoard = currentTetromino.shape.some((row, y) => 
-        row.some((value, x) => 
-          value !== 0 && position.y + y < 0
-        )
-      );
+      // Check for game over - we need more accurate detection
+      // Game is over if any part of the tetromino is above the game board when it gets locked in place
       
-      // Game over only if blocks are stuck above the visible board
-      if (hasBlocksAboveBoard) {
-        console.log('Game Over!');
-        setGameOver(true);
-        setDropTime(null);
-        return;
+      // First check if we're trying to place a tetromino at the top of the board
+      const isAtTopOfBoard = position.y <= 1;
+      
+      // If we're at the top and there's already a collision with existing blocks
+      // then we have a game over situation
+      if (isAtTopOfBoard) {
+        // Check if the current tetromino overlaps with any existing blocks on the board
+        let hasExistingBlocksAtCollision = false;
+        
+        // Check each cell of the current tetromino
+        currentTetromino.shape.forEach((row, y) => {
+          row.forEach((value, x) => {
+            // Only check filled cells
+            if (value !== 0) {
+              const boardY = position.y + y;
+              const boardX = position.x + x;
+              
+              // If this cell is on the board
+              if (
+                boardY >= 0 && 
+                boardY < STAGE_HEIGHT && 
+                boardX >= 0 && 
+                boardX < STAGE_WIDTH
+              ) {
+                // And there's already a merged piece there (value 2)
+                if (newStage[boardY][boardX] === 2) {
+                  hasExistingBlocksAtCollision = true;
+                }
+              }
+            }
+          });
+        });
+        
+        // If we found an overlap with existing blocks at the top
+        if (hasExistingBlocksAtCollision) {
+          console.log('Game Over! Collision at top of board');
+          setGameOver(true);
+          setDropTime(null);
+          return;
+        }
       }
 
       // Merge the tetromino into the stage
@@ -205,20 +233,58 @@ const SimpleTetris: React.FC = () => {
 
   // Rotate the tetromino
   const rotateTetromino = () => {
-    // Clone the tetromino
-    const matrix = [...currentTetromino.shape];
+    // Create a deep copy of the tetromino shape
+    const clonedShape = JSON.parse(JSON.stringify(currentTetromino.shape));
     
-    // Transpose the matrix
-    const transposed = matrix[0].map((_, i) => 
-      matrix.map(row => row[i])
-    );
+    // Get dimensions
+    const rows = clonedShape.length;
+    const cols = clonedShape[0].length;
     
-    // Reverse each row to get a 90-degree rotation
-    const rotated = transposed.map(row => [...row].reverse());
+    // Create a new 2D array for the rotated shape
+    const rotated: number[][] = Array(cols).fill(0).map(() => Array(rows).fill(0));
     
-    // Check if the rotation causes a collision
-    if (!checkCollision(position.x, position.y, rotated)) {
+    // Perform the rotation transformation
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        // 90-degree clockwise rotation: [y][x] -> [x][rows-1-y]
+        rotated[x][rows - 1 - y] = clonedShape[y][x];
+      }
+    }
+    
+    console.log('Rotating tetromino', { original: clonedShape, rotated });
+    
+    // Wall kick: try to adjust position if rotation would cause collision
+    let adjustedX = position.x;
+    let adjustedY = position.y;
+    
+    // Basic wall kicks - try positions: original, left, right, up
+    const possibleAdjustments = [
+      { x: 0, y: 0 },   // Original position
+      { x: -1, y: 0 },  // Left
+      { x: 1, y: 0 },   // Right
+      { x: 0, y: -1 },  // Up
+      { x: -2, y: 0 },  // Far left
+      { x: 2, y: 0 },   // Far right
+    ];
+    
+    // Find a position where the rotated piece doesn't collide
+    let canRotate = false;
+    for (const adjustment of possibleAdjustments) {
+      const newX = position.x + adjustment.x;
+      const newY = position.y + adjustment.y;
+      
+      if (!checkCollision(newX, newY, rotated)) {
+        adjustedX = newX;
+        adjustedY = newY;
+        canRotate = true;
+        break;
+      }
+    }
+    
+    // Apply the rotation if possible
+    if (canRotate) {
       setCurrentTetromino({ ...currentTetromino, shape: rotated });
+      setPosition({ x: adjustedX, y: adjustedY });
     }
   };
 
