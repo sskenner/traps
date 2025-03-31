@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Instructions from './Instructions';
@@ -12,6 +12,28 @@ interface Props {
 const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   const { isMuted, toggleMute } = useAudio();
+
+  // Handle button clicks with better error handling
+  const handleSinglePlayerClick = useCallback(() => {
+    console.log("Single Player button clicked");
+    // Add a small delay to mitigate any potential race conditions
+    setTimeout(() => {
+      try {
+        onStartSinglePlayer();
+      } catch (error) {
+        console.error("Error starting single player mode:", error);
+      }
+    }, 10);
+  }, [onStartSinglePlayer]);
+
+  const handleMultiplayerClick = useCallback(() => {
+    console.log("Multiplayer button clicked");
+    try {
+      onStartMultiplayer();
+    } catch (error) {
+      console.error("Error starting multiplayer mode:", error);
+    }
+  }, [onStartMultiplayer]);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-blue-900 to-black">
@@ -50,25 +72,43 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
             </>
           ) : (
             <>
-              <Button variant="tetris" size="lg" onClick={onStartSinglePlayer} className="text-lg py-6">
+              <Button 
+                variant="tetris" 
+                size="lg" 
+                onClick={handleSinglePlayerClick} 
+                className="text-lg py-6 btn-tetris"
+              >
                 Single Player
               </Button>
               
-              <Button variant="tetris" size="lg" onClick={onStartMultiplayer} className="text-lg py-6">
+              <Button 
+                variant="tetris" 
+                size="lg" 
+                onClick={handleMultiplayerClick} 
+                className="text-lg py-6 btn-tetris"
+              >
                 Multiplayer
               </Button>
               
-              <Button variant="outline" onClick={() => setShowInstructions(true)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowInstructions(true)}
+                className="hover:bg-blue-50"
+              >
                 How to Play
               </Button>
               
-              <Button variant={isMuted ? 'outline' : 'secondary'} onClick={toggleMute}>
+              <Button 
+                variant={isMuted ? 'outline' : 'secondary'} 
+                onClick={toggleMute}
+                className={isMuted ? 'hover:bg-blue-50' : ''}
+              >
                 {isMuted ? 'Unmute Sound' : 'Mute Sound'}
               </Button>
               
               <div className="mt-4 text-center text-xs text-gray-500">
                 <p>Music and sound effects from freesound.org</p>
-                <p>© 2023 Tetris Game</p>
+                <p>© 2025 Tetris Game</p>
               </div>
             </>
           )}

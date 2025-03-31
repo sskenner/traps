@@ -18,6 +18,8 @@ const TetrisBoard: React.FC<Props> = ({
   gameData,
   onLinesClear 
 }) => {
+  console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent });
+  
   const { backgroundMusic, playHit, playSuccess, isMuted } = useAudio();
   const stageRef = useRef<any>(null);
   const CELL_SIZE = isOpponent ? 15 : 30;
@@ -43,9 +45,21 @@ const TetrisBoard: React.FC<Props> = ({
   
   // Start game background music
   useEffect(() => {
+    // Only attempt to play music if game is started, not opponent view, music exists, and not muted
     if (gameStarted && !isOpponent && backgroundMusic && !isMuted) {
       try {
-        backgroundMusic.play().catch(err => console.log('Audio play prevented:', err));
+        // Add a small delay to avoid immediate play which might get blocked
+        const timer = setTimeout(() => {
+          backgroundMusic.play()
+            .catch(err => console.log('Audio play prevented:', err));
+        }, 100);
+        
+        return () => {
+          clearTimeout(timer);
+          if (backgroundMusic) {
+            backgroundMusic.pause();
+          }
+        };
       } catch (error) {
         console.error('Failed to play background music:', error);
       }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useTetris } from '@/lib/stores/useTetris';
 import TetrisBoard from '@/components/Game/TetrisBoard';
 import ScoreBoard from '@/components/Game/ScoreBoard';
@@ -32,8 +32,8 @@ const HomePage: React.FC = () => {
   const [gameOver, setGameOver] = useState(false);
   
   // Effect to update the game stage
-  React.useEffect(() => {
-    if (gameStarted && !gameOver) {
+  useEffect(() => {
+    if (gameStarted && !gameOver && gameMode === GameMode.SINGLE_PLAYER) {
       const gameLoop = setInterval(() => {
         updateStage();
       }, 100);
@@ -42,10 +42,10 @@ const HomePage: React.FC = () => {
         clearInterval(gameLoop);
       };
     }
-  }, [gameStarted, gameOver, updateStage]);
+  }, [gameStarted, gameOver, updateStage, gameMode]);
   
   // Effect to check for game over
-  React.useEffect(() => {
+  useEffect(() => {
     // Check if the player's position is at the top and has collided
     if (player.collided && player.pos.y < 1 && gameStarted) {
       setGameOver(true);
@@ -53,42 +53,45 @@ const HomePage: React.FC = () => {
   }, [player, gameStarted]);
   
   // Start a new game
-  const handleStartGame = () => {
+  const handleStartGame = useCallback(() => {
+    console.log("Starting game");
     setGameOver(false);
     startGame();
-  };
+  }, [startGame]);
   
   // Reset the current game
-  const handleResetGame = () => {
+  const handleResetGame = useCallback(() => {
     resetGame();
     setGameOver(false);
-  };
+  }, [resetGame]);
   
   // Restart after game over
-  const handleRestartGame = () => {
+  const handleRestartGame = useCallback(() => {
     resetGame();
     setGameOver(false);
     startGame();
-  };
+  }, [resetGame, startGame]);
   
   // Return to main menu
-  const handleMainMenu = () => {
+  const handleMainMenu = useCallback(() => {
     resetGame();
     setGameOver(false);
     setGameMode(GameMode.MENU);
-  };
+  }, [resetGame]);
   
   // Start single player mode
-  const handleStartSinglePlayer = () => {
+  const handleStartSinglePlayer = useCallback(() => {
+    console.log("Starting single player mode");
     setGameMode(GameMode.SINGLE_PLAYER);
     resetGame();
-  };
+  }, [resetGame]);
   
   // Start multiplayer mode
-  const handleStartMultiplayer = () => {
+  const handleStartMultiplayer = useCallback(() => {
+    console.log("Starting multiplayer mode");
     setGameMode(GameMode.MULTIPLAYER);
     resetGame();
-  };
+  }, [resetGame]);
   
   // Render the appropriate game mode
   switch (gameMode) {
