@@ -130,37 +130,31 @@ const SimpleTetris: React.FC = () => {
         // Check if the current tetromino overlaps with any existing blocks on the board
         let hasExistingBlocksAtCollision = false;
 
-        // Check each cell of the current tetromino
-        currentTetromino.shape.forEach((row, y) => {
-          row.forEach((value, x) => {
-            // Only check filled cells
-            if (value !== 0) {
-              const boardY = position.y + y;
-              const boardX = position.x + x;
+        // Check if any part of the piece would spawn inside existing blocks
+  let hasCollisionAtSpawn = false;
+  currentTetromino.shape.forEach((row, y) => {
+    row.forEach((value, x) => {
+      if (value !== 0) {
+        const boardY = position.y + y;
+        const boardX = position.x + x;
 
-              // If this cell is on the board
-              if (
-                boardY >= 0 &&
-                boardY < STAGE_HEIGHT &&
-                boardX >= 0 &&
-                boardX < STAGE_WIDTH
-              ) {
-                // And there's already a merged piece there (value 2)
-                if (newStage[boardY][boardX] === 2) {
-                  hasExistingBlocksAtCollision = true;
-                }
-              }
-            }
-          });
-        });
-
-        // If we found an overlap with existing blocks at the top
-        if (hasExistingBlocksAtCollision) {
-          console.log('Game Over! Collision at top of board');
-          setGameOver(true);
-          setDropTime(null);
-          return;
+        // Check collision at spawn position
+        if (boardY >= 0 && boardY < STAGE_HEIGHT && boardX >= 0 && boardX < STAGE_WIDTH) {
+          if (newStage[boardY][boardX] === 2) { // 2 represents a merged piece
+            hasCollisionAtSpawn = true;
+          }
         }
+      }
+    });
+  });
+
+  // If the piece would spawn inside existing blocks, it's game over
+  if (hasCollisionAtSpawn && position.y <= 0) {
+    console.log('Game Over! No space at spawn point');
+    setGameOver(true);
+    setDropTime(null);
+    return;
+  }
       }
 
       // Merge the tetromino into the stage
