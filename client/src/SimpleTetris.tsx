@@ -41,8 +41,8 @@ const TETROMINOS = {
 type TetrominoType = keyof typeof TETROMINOS;
 
 // Create an empty stage
-const createStage = () => 
-  Array.from(Array(STAGE_HEIGHT), () => 
+const createStage = () =>
+  Array.from(Array(STAGE_HEIGHT), () =>
     Array(STAGE_WIDTH).fill(0)
   );
 
@@ -73,15 +73,15 @@ const SimpleTetris: React.FC = () => {
       for (let col = 0; col < matrix[row].length; col++) {
         // Skip empty cells (zeros)
         if (matrix[row][col] === 0) continue;
-        
+
         // Calculate the position of the cell in the stage
         const stageX = x + col;
         const stageY = y + row;
-        
+
         // Check if we're outside the game area or there's a collision with an existing piece
         if (
-          stageX < 0 || 
-          stageX >= STAGE_WIDTH || 
+          stageX < 0 ||
+          stageX >= STAGE_WIDTH ||
           stageY >= STAGE_HEIGHT ||
           (stageY >= 0 && stage[stageY][stageX] !== 0)
         ) {
@@ -95,7 +95,7 @@ const SimpleTetris: React.FC = () => {
   // Update the game stage
   const updateStage = () => {
     // Copy the stage - keep settled cells (2) but clear active cells (1)
-    const newStage = stage.map(row => 
+    const newStage = stage.map(row =>
       row.map(cell => (cell === 1 ? 0 : cell))
     );
 
@@ -104,9 +104,9 @@ const SimpleTetris: React.FC = () => {
       row.forEach((value, x) => {
         if (value !== 0) {
           if (
-            position.y + y >= 0 && 
-            position.y + y < STAGE_HEIGHT && 
-            position.x + x >= 0 && 
+            position.y + y >= 0 &&
+            position.y + y < STAGE_HEIGHT &&
+            position.x + x >= 0 &&
             position.x + x < STAGE_WIDTH
           ) {
             newStage[position.y + y][position.x + x] = 1;
@@ -119,16 +119,16 @@ const SimpleTetris: React.FC = () => {
     if (checkCollision(position.x, position.y + 1, currentTetromino.shape)) {
       // Check for game over - we need more accurate detection
       // Game is over if any part of the tetromino is above the game board when it gets locked in place
-      
+
       // First check if we're trying to place a tetromino at the top of the board
       const isAtTopOfBoard = position.y <= 1;
-      
+
       // If we're at the top and there's already a collision with existing blocks
       // then we have a game over situation
       if (isAtTopOfBoard) {
         // Check if the current tetromino overlaps with any existing blocks on the board
         let hasExistingBlocksAtCollision = false;
-        
+
         // Check each cell of the current tetromino
         currentTetromino.shape.forEach((row, y) => {
           row.forEach((value, x) => {
@@ -136,12 +136,12 @@ const SimpleTetris: React.FC = () => {
             if (value !== 0) {
               const boardY = position.y + y;
               const boardX = position.x + x;
-              
+
               // If this cell is on the board
               if (
-                boardY >= 0 && 
-                boardY < STAGE_HEIGHT && 
-                boardX >= 0 && 
+                boardY >= 0 &&
+                boardY < STAGE_HEIGHT &&
+                boardX >= 0 &&
                 boardX < STAGE_WIDTH
               ) {
                 // And there's already a merged piece there (value 2)
@@ -152,7 +152,7 @@ const SimpleTetris: React.FC = () => {
             }
           });
         });
-        
+
         // If we found an overlap with existing blocks at the top
         if (hasExistingBlocksAtCollision) {
           console.log('Game Over! Collision at top of board');
@@ -166,13 +166,13 @@ const SimpleTetris: React.FC = () => {
       const mergedStage = newStage.map((row, y) =>
         row.map((cell, x) => {
           // Check if we're drawing an active tetromino cell here
-          const isTetroCell = 
-            position.y <= y && 
-            y < position.y + currentTetromino.shape.length && 
-            position.x <= x && 
-            x < position.x + currentTetromino.shape[0].length && 
+          const isTetroCell =
+            position.y <= y &&
+            y < position.y + currentTetromino.shape.length &&
+            position.x <= x &&
+            x < position.x + currentTetromino.shape[0].length &&
             currentTetromino.shape[y - position.y][x - position.x] !== 0;
-          
+
           // If it's a tetromino cell and not already filled, set it to 2 (merged)
           return isTetroCell ? 2 : cell;
         })
@@ -194,7 +194,7 @@ const SimpleTetris: React.FC = () => {
       if (rowsCleared > 0) {
         setScore(prev => prev + rowsCleared * 100 * (level + 1));
         setRows(prev => prev + rowsCleared);
-        
+
         // Increase level for every 10 rows cleared
         if ((rows + rowsCleared) >= (level + 1) * 10) {
           setLevel(prev => prev + 1);
@@ -204,24 +204,27 @@ const SimpleTetris: React.FC = () => {
 
       // Get a new tetromino and reset position
       setCurrentTetromino(nextTetromino);
-      
-      // Generate the next tetromino for preview
-      const newNextTetromino = randomTetromino();
-      setNextTetromino(newNextTetromino);
-      
+      getNewTetromino();
+
+
       // Calculate position based on tetromino width to center it
       const tetrominoWidth = nextTetromino.shape[0].length;
       const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
-      
+
       // Set the position
       setPosition({ x: startX, y: 0 });
-      
+
       // Update the stage with cleared rows
       setStage(clearedStage);
     } else {
       // Simply update the stage
       setStage(newStage);
     }
+  };
+
+  const getNewTetromino = () => {
+    const newNextTetromino = randomTetromino();
+    setNextTetromino(newNextTetromino);
   };
 
   // Move the tetromino
@@ -235,14 +238,14 @@ const SimpleTetris: React.FC = () => {
   const rotateTetromino = () => {
     // Create a deep copy of the tetromino shape
     const clonedShape = JSON.parse(JSON.stringify(currentTetromino.shape));
-    
+
     // Get dimensions
     const rows = clonedShape.length;
     const cols = clonedShape[0].length;
-    
+
     // Create a new 2D array for the rotated shape
     const rotated: number[][] = Array(cols).fill(0).map(() => Array(rows).fill(0));
-    
+
     // Perform the rotation transformation
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -250,13 +253,13 @@ const SimpleTetris: React.FC = () => {
         rotated[x][rows - 1 - y] = clonedShape[y][x];
       }
     }
-    
+
     console.log('Rotating tetromino', { original: clonedShape, rotated });
-    
+
     // Wall kick: try to adjust position if rotation would cause collision
     let adjustedX = position.x;
     let adjustedY = position.y;
-    
+
     // Basic wall kicks - try positions: original, left, right, up
     const possibleAdjustments = [
       { x: 0, y: 0 },   // Original position
@@ -266,13 +269,13 @@ const SimpleTetris: React.FC = () => {
       { x: -2, y: 0 },  // Far left
       { x: 2, y: 0 },   // Far right
     ];
-    
+
     // Find a position where the rotated piece doesn't collide
     let canRotate = false;
     for (const adjustment of possibleAdjustments) {
       const newX = position.x + adjustment.x;
       const newY = position.y + adjustment.y;
-      
+
       if (!checkCollision(newX, newY, rotated)) {
         adjustedX = newX;
         adjustedY = newY;
@@ -280,7 +283,7 @@ const SimpleTetris: React.FC = () => {
         break;
       }
     }
-    
+
     // Apply the rotation if possible
     if (canRotate) {
       setCurrentTetromino({ ...currentTetromino, shape: rotated });
@@ -291,12 +294,37 @@ const SimpleTetris: React.FC = () => {
   // Hard drop - move the tetromino all the way down
   const hardDrop = () => {
     let newY = position.y;
+    // Find the lowest position where the piece can go
     while (!checkCollision(position.x, newY + 1, currentTetromino.shape)) {
       newY += 1;
     }
+
+    // Update position
     setPosition(prev => ({ ...prev, y: newY }));
-    // Give a small delay before checking for game over to allow proper collision resolution
-    setTimeout(() => updateStage(), 50);
+
+    // Update stage immediately with the merged piece
+    const newStage = stage.map(row => [...row]);
+
+    // Merge the tetromino at its final position
+    currentTetromino.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value !== 0) {
+          if (
+            newY + y >= 0 &&
+            newY + y < STAGE_HEIGHT &&
+            position.x + x >= 0 &&
+            position.x + x < STAGE_WIDTH
+          ) {
+            newStage[newY + y][position.x + x] = 2; // Mark as merged
+          }
+        }
+      });
+    });
+
+    setStage(newStage);
+
+    // Get new tetromino immediately
+    getNewTetromino();
   };
 
   // Start the game
@@ -306,28 +334,28 @@ const SimpleTetris: React.FC = () => {
     setScore(0);
     setRows(0);
     setLevel(0);
-    
+
     // Get initial tetrominos
     const firstTetromino = randomTetromino();
     const secondTetromino = randomTetromino();
-    
+
     // Set tetrominos
     setCurrentTetromino(firstTetromino);
     setNextTetromino(secondTetromino);
-    
+
     // Calculate initial position based on tetromino width
     // This ensures the piece is centered
     const tetrominoWidth = firstTetromino.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
-    
+
     // Start with the tetromino fully visible on the board
     setPosition({ x: startX, y: 0 });
-    
+
     // Reset game state
     setGameOver(false);
     setGameStarted(true);
     setDropTime(1000);
-    
+
     console.log('Game started with', firstTetromino);
   };
 
@@ -337,7 +365,7 @@ const SimpleTetris: React.FC = () => {
       const gameLoop = setInterval(() => {
         updateStage();
       }, 100);
-      
+
       return () => clearInterval(gameLoop);
     }
   }, [gameStarted, gameOver, stage, position, currentTetromino]);
@@ -348,7 +376,7 @@ const SimpleTetris: React.FC = () => {
       const dropTimer = setInterval(() => {
         moveTetromino(0, 1);
       }, dropTime);
-      
+
       return () => clearInterval(dropTimer);
     }
   }, [dropTime, gameStarted, gameOver, position, currentTetromino.shape]);
@@ -357,7 +385,7 @@ const SimpleTetris: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameStarted || gameOver) return;
-      
+
       switch (e.code) {
         case 'ArrowLeft':
           moveTetromino(-1, 0);
@@ -376,14 +404,14 @@ const SimpleTetris: React.FC = () => {
           break;
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [gameStarted, gameOver, position, currentTetromino.shape]);
 
   // Render functions
   const renderStage = () => (
-    stage.map((row, y) => 
+    stage.map((row, y) =>
       row.map((cell, x) => (
         <Rect
           key={`${x}-${y}`}
@@ -403,7 +431,7 @@ const SimpleTetris: React.FC = () => {
     <Stage width={120} height={120}>
       <Layer>
         {nextTetromino.shape.map((row, y) =>
-          row.map((cell, x) => 
+          row.map((cell, x) =>
             cell !== 0 && (
               <Rect
                 key={`next-${x}-${y}`}
@@ -428,7 +456,7 @@ const SimpleTetris: React.FC = () => {
       <div className="mb-6">
         <h1 className="text-4xl font-bold text-blue-400 text-center">TETRIS</h1>
       </div>
-      
+
       <div className="flex flex-col md:flex-row gap-6">
         {/* Game Board */}
         <div className="tetris-board bg-gray-800 p-2 rounded-lg">
@@ -438,7 +466,7 @@ const SimpleTetris: React.FC = () => {
             </Layer>
           </Stage>
         </div>
-        
+
         {/* Game Info & Controls */}
         <div className="w-64 flex flex-col gap-4">
           {/* Score */}
@@ -456,31 +484,31 @@ const SimpleTetris: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Next Piece */}
           <div className="bg-gray-800 p-4 rounded-lg">
             <h2 className="text-xl font-bold text-white mb-2">Next Piece</h2>
             {renderNextTetromino()}
           </div>
-          
+
           {/* Controls */}
           <div className="flex flex-col gap-2">
             {!gameStarted || gameOver ? (
-              <button 
+              <button
                 onClick={startGame}
                 className="py-3 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {gameOver ? 'Play Again' : 'Start Game'}
               </button>
             ) : (
-              <button 
+              <button
                 onClick={() => setGameOver(true)}
                 className="py-3 px-6 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 End Game
               </button>
             )}
-            
+
             {/* Game Controls */}
             <div className="mt-4 p-4 bg-gray-800 rounded-lg">
               <h3 className="text-lg font-bold text-white mb-2">Controls</h3>
@@ -492,7 +520,7 @@ const SimpleTetris: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Game Over Modal */}
       {gameOver && gameStarted && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center">
@@ -504,7 +532,7 @@ const SimpleTetris: React.FC = () => {
               <p className="text-xl text-gray-300">Rows Cleared: <span className="text-green-400">{rows}</span></p>
             </div>
             <div className="flex gap-4">
-              <button 
+              <button
                 onClick={startGame}
                 className="flex-1 py-3 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
