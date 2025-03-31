@@ -1,0 +1,23 @@
+Create an online version of the classic video game Tetris. The game should have the following core mechanics:
+Gameplay: Standard Tetris gameplay with falling tetrominoes (I, J, L, O, S, T, Z shapes). Players should be able to rotate and move the falling pieces. The goal is to create solid horizontal lines that then disappear, earning the player points.
+Game Over: The game ends when the stack of blocks reaches the top of the playfield.
+Scoring: Implement a standard Tetris scoring system (single, double, triple, Tetris line clears).
+Level Progression: The game should increase in difficulty over time, primarily by increasing the speed at which the tetrominoes fall.
+User Interface: A clean and intuitive user interface displaying the current score, level, and the next piece.
+Online Functionality: Implement basic online functionality allowing two players to compete against each other in a real-time match. This could involve a simple system where clearing lines sends 'garbage' blocks to the opponent's field.
+Asset Requirements:
+Audio Effects: Utilize free, copyright-free sound effects for actions such as piece placement, line clears, and game over. Source these from https://freesound.org/.
+Background Music: Include free, copyright-free background music that loops smoothly during gameplay. Source this from https://freemusicarchive.org/.
+Visual Assets:
+2D Tetrominoes: Use free, copyright-free 2D assets for the tetromino pieces. Explore options on https://www.gameart2d.com/freebies.html. Ensure they are visually distinct and easy to identify.
+Optional 3D Elements: If feasible and it doesn't significantly increase complexity, consider incorporating free, copyright-free 3D models for either the tetrominoes or background elements. Source these from www.turbosquid.com. Prioritize clarity and performance over highly detailed 3D models.
+Technical Considerations:
+Platform: The game should be playable directly in a web browser using technologies suitable for Replit.com (e.g., HTML, CSS, JavaScript, potentially a game engine like Phaser.js or PixiJS if deemed necessary).
+Multiplayer Implementation: Explore simple multiplayer solutions suitable for a Replit environment. Consider using WebSockets or a similar technology for real-time communication.
+Constraints:
+Copyright Compliance: Ensure all used assets are genuinely free and do not violate any copyright restrictions. Clearly document the source and license of each asset used.
+Focus on Core Functionality: Prioritize implementing the core Tetris gameplay and basic online multiplayer before adding extensive features or polish.
+Deliverables:
+Working online Tetris game accessible via a Replit URL.
+Documentation outlining the technologies used and the sources of the free assets.
+Please proceed with creating this online Tetris game, adhering to the specified requirements and constraints.
