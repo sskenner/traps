@@ -71,10 +71,8 @@ const SimpleTetris: React.FC = () => {
     for (let row = 0; row < matrix.length; row++) {
       for (let col = 0; col < matrix[row].length; col++) {
         if (matrix[row][col] === 0) continue;
-
         const stageX = x + col;
         const stageY = y + row;
-
         // Allow pieces to exist partially above the stage
         if (stageX < 0 || stageX >= STAGE_WIDTH || stageY >= STAGE_HEIGHT) {
           return true;
@@ -123,38 +121,35 @@ const SimpleTetris: React.FC = () => {
 
       // First check if we're trying to place a tetromino at the top of the board
       const isAtTopOfBoard = position.y <= 1;
-
       // If we're at the top and there's already a collision with existing blocks
       // then we have a game over situation
       if (isAtTopOfBoard) {
         // Check if the current tetromino overlaps with any existing blocks on the board
         let hasExistingBlocksAtCollision = false;
-
         // Check if any part of the piece would spawn inside existing blocks
-  let hasCollisionAtSpawn = false;
-  currentTetromino.shape.forEach((row, y) => {
-    row.forEach((value, x) => {
-      if (value !== 0) {
-        const boardY = position.y + y;
-        const boardX = position.x + x;
+        let hasCollisionAtSpawn = false;
+        currentTetromino.shape.forEach((row, y) => {
+          row.forEach((value, x) => {
+            if (value !== 0) {
+              const boardY = position.y + y;
+              const boardX = position.x + x;
 
-        // Check collision at spawn position
-        if (boardY >= 0 && boardY < STAGE_HEIGHT && boardX >= 0 && boardX < STAGE_WIDTH) {
-          if (newStage[boardY][boardX] === 2) { // 2 represents a merged piece
-            hasCollisionAtSpawn = true;
-          }
+              // Check collision at spawn position
+              if (boardY >= 0 && boardY < STAGE_HEIGHT && boardX >= 0 && boardX < STAGE_WIDTH) {
+                if (newStage[boardY][boardX] === 2) { // 2 
+                  hasCollisionAtSpawn = true;
+                }
+              }
+            }
+          });
+        });
+        // If the piece would spawn inside existing blocks, it's game over
+        if (hasCollisionAtSpawn && position.y <= 0) {
+          console.log('Game Over! No space at spawn point');
+          setGameOver(true);
+          setDropTime(null);
+          return;
         }
-      }
-    });
-  });
-
-  // If the piece would spawn inside existing blocks, it's game over
-  if (hasCollisionAtSpawn && position.y <= 0) {
-    console.log('Game Over! No space at spawn point');
-    setGameOver(true);
-    setDropTime(null);
-    return;
-  }
       }
 
       // Merge the tetromino into the stage
@@ -172,7 +167,6 @@ const SimpleTetris: React.FC = () => {
           return isTetroCell ? 2 : cell;
         })
       );
-
       // Check for completed rows
       let rowsCleared = 0;
       const clearedStage = mergedStage.map(row => {
@@ -184,7 +178,6 @@ const SimpleTetris: React.FC = () => {
         }
         return row;
       });
-
       // Calculate score
       if (rowsCleared > 0) {
         setScore(prev => prev + rowsCleared * 100 * (level + 1));
@@ -208,7 +201,6 @@ const SimpleTetris: React.FC = () => {
 
       // Set the position
       setPosition({ x: startX, y: 0 });
-
       // Update the stage with cleared rows
       setStage(clearedStage);
     } else {
@@ -221,8 +213,9 @@ const SimpleTetris: React.FC = () => {
     const newPiece = nextTetromino;
     const pieceWidth = newPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - pieceWidth) / 2);
-    const startY = -2;  // Start higher to give more space
-    
+    const startY = -2;
+    // Start higher to give more space
+
     if (checkCollision(startX, startY, newPiece.shape)) {
       setGameOver(true);
       setDropTime(null);
@@ -245,14 +238,11 @@ const SimpleTetris: React.FC = () => {
   const rotateTetromino = () => {
     // Create a deep copy of the tetromino shape
     const clonedShape = JSON.parse(JSON.stringify(currentTetromino.shape));
-
     // Get dimensions
     const rows = clonedShape.length;
     const cols = clonedShape[0].length;
-
     // Create a new 2D array for the rotated shape
     const rotated: number[][] = Array(cols).fill(0).map(() => Array(rows).fill(0));
-
     // Perform the rotation transformation
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -262,7 +252,6 @@ const SimpleTetris: React.FC = () => {
     }
 
     console.log('Rotating tetromino', { original: clonedShape, rotated });
-
     // Wall kick: try to adjust position if rotation would cause collision
     let adjustedX = position.x;
     let adjustedY = position.y;
@@ -276,7 +265,6 @@ const SimpleTetris: React.FC = () => {
       { x: -2, y: 0 },  // Far left
       { x: 2, y: 0 },   // Far right
     ];
-
     // Find a position where the rotated piece doesn't collide
     let canRotate = false;
     for (const adjustment of possibleAdjustments) {
@@ -301,7 +289,6 @@ const SimpleTetris: React.FC = () => {
   // Hard drop - move the tetromino all the way down
   const hardDrop = () => {
     let newY = position.y;
-
     // Find the lowest valid position
     while (!checkCollision(position.x, newY + 1, currentTetromino.shape)) {
       newY += 1;
@@ -309,7 +296,6 @@ const SimpleTetris: React.FC = () => {
 
     // Create a new stage
     const newStage = stage.map(row => [...row]);
-
     // Check if placing piece at new position would cause game over
     let wouldCauseGameOver = false;
     currentTetromino.shape.forEach((row, y) => {
@@ -321,14 +307,12 @@ const SimpleTetris: React.FC = () => {
         }
       });
     });
-
     if (wouldCauseGameOver) {
       return; // Don't allow the hard drop if it would cause immediate game over
     }
 
     // Update position and merge the piece
     setPosition(prev => ({ ...prev, y: newY }));
-    
     // Merge the tetromino at its final position
     currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
@@ -343,13 +327,11 @@ const SimpleTetris: React.FC = () => {
 
     // Update stage
     setStage(newStage);
-
     // Spawn new piece with proper positioning
     const nextPiece = nextTetromino;
     const newNextPiece = randomTetromino();
     setCurrentTetromino(nextPiece);
     setNextTetromino(newNextPiece);
-    
     // Calculate center position for new piece
     const tetrominoWidth = nextPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
@@ -367,7 +349,6 @@ const SimpleTetris: React.FC = () => {
     // Get initial tetrominos
     const firstTetromino = randomTetromino();
     const secondTetromino = randomTetromino();
-
     // Set tetrominos
     setCurrentTetromino(firstTetromino);
     setNextTetromino(secondTetromino);
@@ -379,7 +360,6 @@ const SimpleTetris: React.FC = () => {
 
     // Start with the tetromino fully visible on the board
     setPosition({ x: startX, y: 0 });
-
     // Reset game state
     setGameOver(false);
     setGameStarted(true);
@@ -522,7 +502,8 @@ const SimpleTetris: React.FC = () => {
 
           {/* Controls */}
           <div className="flex flex-col gap-2">
-            {!gameStarted || gameOver ? (
+            {!gameStarted ||
+              gameOver ? (
               <button
                 onClick={startGame}
                 className="py-3 px-6 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
