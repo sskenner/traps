@@ -305,11 +305,29 @@ const SimpleTetris: React.FC = () => {
       newY += 1;
     }
 
-    // Update position
-    setPosition(prev => ({ ...prev, y: newY }));
-
-    // Create a new stage with the dropped piece merged
+    // Create a new stage
     const newStage = stage.map(row => [...row]);
+
+    // Check if placing piece at new position would cause game over
+    let wouldCauseGameOver = false;
+    currentTetromino.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value !== 0) {
+          if (newY + y < 2 && newStage[newY + y][position.x + x] === 2) {
+            wouldCauseGameOver = true;
+          }
+        }
+      });
+    });
+
+    if (wouldCauseGameOver) {
+      return; // Don't allow the hard drop if it would cause immediate game over
+    }
+
+    // Update position and merge the piece
+    setPosition(prev => ({ ...prev, y: newY }));
+    
+    // Merge the tetromino at its final position
     currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
@@ -321,12 +339,18 @@ const SimpleTetris: React.FC = () => {
       });
     });
 
-    // Update stage and spawn new piece
+    // Update stage
     setStage(newStage);
-    const tetrominoWidth = nextTetromino.shape[0].length;
+
+    // Spawn new piece with proper positioning
+    const nextPiece = nextTetromino;
+    const newNextPiece = randomTetromino();
+    setCurrentTetromino(nextPiece);
+    setNextTetromino(newNextPiece);
+    
+    // Calculate center position for new piece
+    const tetrominoWidth = nextPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
-    setCurrentTetromino(nextTetromino);
-    setNextTetromino(randomTetromino());
     setPosition({ x: startX, y: 0 });
   };
 
