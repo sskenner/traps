@@ -223,8 +223,13 @@ const SimpleTetris: React.FC = () => {
   };
 
   const getNewTetromino = () => {
-    const newNextTetromino = randomTetromino();
-    setNextTetromino(newNextTetromino);
+    const newPiece = nextTetromino;
+    const pieceWidth = newPiece.shape[0].length;
+    const startX = Math.floor((STAGE_WIDTH - pieceWidth) / 2);
+
+    setCurrentTetromino(newPiece);
+    setNextTetromino(randomTetromino());
+    setPosition({ x: startX, y: 0 });
   };
 
   // Move the tetromino
