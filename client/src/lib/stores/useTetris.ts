@@ -217,6 +217,19 @@ export const useTetris = () => {
     }
   }, [gameStarted, updateStage]);
 
+  const movePlayer = (dir: number) => {
+    const collision = checkCollision(player.pos.x + dir, player.pos.y, player.tetromino);
+    if (collision === 'gameover') {
+      setGameStarted(false);
+    } else if (!collision) {
+      setPlayer(prev => ({
+        ...prev,
+        pos: { x: prev.pos.x + dir, y: prev.pos.y }
+      }));
+    }
+  };
+
+
   return {
     player,
     stage,
@@ -234,6 +247,7 @@ export const useTetris = () => {
     resetGame,
     updateStage,
     sweepRows,
-    addGarbageLines
+    addGarbageLines,
+    movePlayer
   };
 };
