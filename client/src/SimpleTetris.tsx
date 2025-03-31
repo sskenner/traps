@@ -295,6 +295,8 @@ const SimpleTetris: React.FC = () => {
       newY += 1;
     }
     setPosition(prev => ({ ...prev, y: newY }));
+    // Give a small delay before checking for game over to allow proper collision resolution
+    setTimeout(() => updateStage(), 50);
   };
 
   // Start the game
