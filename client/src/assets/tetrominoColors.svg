@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <!-- I Tetromino (Long piece) -->
+  <rect x="10" y="10" width="20" height="20" fill="#00f0f0" />
+  <rect x="10" y="30" width="20" height="20" fill="#00f0f0" />
+  <rect x="10" y="50" width="20" height="20" fill="#00f0f0" />
+  <rect x="10" y="70" width="20" height="20" fill="#00f0f0" />
+  
+  <!-- J Tetromino -->
+  <rect x="40" y="10" width="20" height="20" fill="#0000f0" />
+  <rect x="40" y="30" width="20" height="20" fill="#0000f0" />
+  <rect x="40" y="50" width="20" height="20" fill="#0000f0" />
+  <rect x="60" y="50" width="20" height="20" fill="#0000f0" />
+  
+  <!-- L Tetromino -->
+  <rect x="90" y="10" width="20" height="20" fill="#f0a000" />
+  <rect x="90" y="30" width="20" height="20" fill="#f0a000" />
+  <rect x="90" y="50" width="20" height="20" fill="#f0a000" />
+  <rect x="70" y="50" width="20" height="20" fill="#f0a000" />
+  
+  <!-- O Tetromino (Square) -->
+  <rect x="130" y="10" width="20" height="20" fill="#f0f000" />
+  <rect x="150" y="10" width="20" height="20" fill="#f0f000" />
+  <rect x="130" y="30" width="20" height="20" fill="#f0f000" />
+  <rect x="150" y="30" width="20" height="20" fill="#f0f000" />
+  
+  <!-- S Tetromino -->
+  <rect x="70" y="90" width="20" height="20" fill="#00f000" />
+  <rect x="90" y="90" width="20" height="20" fill="#00f000" />
+  <rect x="50" y="110" width="20" height="20" fill="#00f000" />
+  <rect x="70" y="110" width="20" height="20" fill="#00f000" />
+  
+  <!-- T Tetromino -->
+  <rect x="130" y="70" width="20" height="20" fill="#a000f0" />
+  <rect x="110" y="90" width="20" height="20" fill="#a000f0" />
+  <rect x="130" y="90" width="20" height="20" fill="#a000f0" />
+  <rect x="150" y="90" width="20" height="20" fill="#a000f0" />
+  
+  <!-- Z Tetromino -->
+  <rect x="10" y="130" width="20" height="20" fill="#f00000" />
+  <rect x="30" y="130" width="20" height="20" fill="#f00000" />
+  <rect x="30" y="150" width="20" height="20" fill="#f00000" />
+  <rect x="50" y="150" width="20" height="20" fill="#f00000" />
+</svg>
