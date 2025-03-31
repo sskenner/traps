@@ -209,13 +209,14 @@ const SimpleTetris: React.FC = () => {
     }
   };
 
+  // Get a new tetromino
   const getNewTetromino = () => {
     const newPiece = nextTetromino;
     const pieceWidth = newPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - pieceWidth) / 2);
-    const startY = -2;
-    // Start higher to give more space
+    const startY = 0;  // Start at the top
 
+    // Check if there's space for the new piece
     if (checkCollision(startX, startY, newPiece.shape)) {
       setGameOver(true);
       setDropTime(null);
