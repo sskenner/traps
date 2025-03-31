@@ -25,40 +25,48 @@ const MultiplayerLobby: React.FC<Props> = ({ onBack }) => {
   
   // Initialize WebSocket connection
   useEffect(() => {
-    // Get the hostname and port from the current URL
-    const hostname = window.location.hostname;
-    const port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let ws: WebSocket;
     
-    // For Replit, use the same host and port
-    const wsUrl = `${protocol}//${hostname}:${port}/ws`;
-    
-    console.log('Connecting to WebSocket at:', wsUrl);
-    const ws = new WebSocket(wsUrl);
-    
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-      setConnected(true);
-    };
-    
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      setConnected(false);
-    };
-    
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
+    try {
+      // Get the hostname from the current URL
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      
+      // For Replit, use the same host without specifying the port
+      const wsUrl = `${protocol}//${hostname}/ws`;
+      
+      console.log('Connecting to WebSocket at:', wsUrl);
+      ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        setConnected(true);
+      };
+      
+      ws.onclose = () => {
+        console.log('WebSocket disconnected');
+        setConnected(false);
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        setError('Failed to connect to game server. Please try again later.');
+      };
+      
+      ws.onmessage = (event) => {
+        handleSocketMessage(event);
+      };
+      
+      setSocket(ws);
+    } catch (err) {
+      console.error('Error creating WebSocket:', err);
       setError('Failed to connect to game server. Please try again later.');
-    };
-    
-    ws.onmessage = (event) => {
-      handleSocketMessage(event);
-    };
-    
-    setSocket(ws);
+    }
     
     return () => {
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
     };
   }, []);
   
