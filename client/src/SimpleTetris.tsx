@@ -121,14 +121,29 @@ const SimpleTetris: React.FC = () => {
       // Check for game over - we need more accurate detection
       // Game is over if any part of the tetromino is above the game board when it gets locked in place
 
-      // First check if we're trying to place a tetromino at the top of the board
-      const isAtTopOfBoard = position.y <= 1;
+      // Lock the current piece in place by marking its cells as settled (2)
+      currentTetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            if (position.y + y >= 0 && position.y + y < STAGE_HEIGHT) {
+              newStage[position.y + y][position.x + x] = 2;
+            }
+          }
+        });
+      });
 
-      // If we're at the top and there's already a collision with existing blocks
-      // then we have a game over situation
-      if (isAtTopOfBoard) {
-        // Check if the current tetromino overlaps with any existing blocks on the board
-        let hasExistingBlocksAtCollision = false;
+      // Check if any part of the piece is above the board
+      const hasBlocksAboveBoard = currentTetromino.shape.some((row, y) => {
+        return row.some((value, x) => {
+          return value !== 0 && position.y + y < 0;
+        });
+      });
+
+      if (hasBlocksAboveBoard) {
+        setGameOver(true);
+        setDropTime(null);
+        return newStage;
+      }
 
         // Check if any part of the piece would spawn inside existing blocks
   let hasCollisionAtSpawn = false;
