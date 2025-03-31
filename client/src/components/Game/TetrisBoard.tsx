@@ -208,6 +208,12 @@ const TetrisBoard: React.FC<Props> = ({
       >
         <Layer>
           {renderStage()}
+          {/* Render the active tetromino */}
+          <Tetromino 
+            tetromino={player.tetromino}
+            position={player.pos}
+            cellSize={CELL_SIZE}
+          />
         </Layer>
       </Stage>
     </div>
