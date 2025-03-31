@@ -167,17 +167,24 @@ const SimpleTetris: React.FC = () => {
           return isTetroCell ? 2 : cell;
         })
       );
-      // Check for completed rows
+      // Check for completed rows and create new stage with cleared rows moved down
       let rowsCleared = 0;
-      const clearedStage = mergedStage.map(row => {
-        // If every cell in the row is not empty
-        if (row.every(cell => cell !== 0)) {
+      const newStageFinal = [];
+      
+      // Check each row from bottom to top
+      for (let y = STAGE_HEIGHT - 1; y >= 0; y--) {
+        const row = mergedStage[y];
+        
+        // If row is not complete, keep it
+        if (!row.every(cell => cell !== 0)) {
+          newStageFinal.unshift(row);
+        } else {
           rowsCleared += 1;
-          // Return an empty row
-          return Array(STAGE_WIDTH).fill(0);
+          // Add empty row at top
+          newStageFinal.push(Array(STAGE_WIDTH).fill(0));
         }
-        return row;
-      });
+      }
+      
       // Calculate score
       if (rowsCleared > 0) {
         setScore(prev => prev + rowsCleared * 100 * (level + 1));
@@ -189,6 +196,9 @@ const SimpleTetris: React.FC = () => {
           setDropTime(1000 / (level + 2) + 200);
         }
       }
+      
+      // Update stage with cleared rows
+      setStage(newStageFinal);
 
       // Get a new tetromino and reset position
       setCurrentTetromino(nextTetromino);
