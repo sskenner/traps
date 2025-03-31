@@ -58,7 +58,7 @@ const SimpleTetris: React.FC = () => {
   const [stage, setStage] = useState(createStage());
   const [currentTetromino, setCurrentTetromino] = useState(randomTetromino());
   const [nextTetromino, setNextTetromino] = useState(randomTetromino());
-  const [position, setPosition] = useState({ x: 3, y: 0 });
+  const [position, setPosition] = useState({ x: Math.floor(STAGE_WIDTH / 2) - 1, y: -1 });
   const [score, setScore] = useState(0);
   const [rows, setRows] = useState(0);
   const [level, setLevel] = useState(0);
@@ -68,23 +68,18 @@ const SimpleTetris: React.FC = () => {
 
   // Helper function to check collisions
   const checkCollision = (x: number, y: number, matrix: number[][]) => {
-    // Check if piece is inside the game boundaries (sides and bottom)
     for (let row = 0; row < matrix.length; row++) {
       for (let col = 0; col < matrix[row].length; col++) {
-        // Skip empty cells (zeros)
         if (matrix[row][col] === 0) continue;
 
-        // Calculate the position of the cell in the stage
         const stageX = x + col;
         const stageY = y + row;
 
-        // Check if we're outside the game area or there's a collision with an existing piece
-        if (
-          stageX < 0 ||
-          stageX >= STAGE_WIDTH ||
-          stageY >= STAGE_HEIGHT ||
-          (stageY >= 0 && stage[stageY][stageX] !== 0)
-        ) {
+        if (stageX < 0 || stageX >= STAGE_WIDTH || stageY >= STAGE_HEIGHT) {
+          return true;
+        }
+
+        if (stageY >= 0 && stage[stageY] && stage[stageY][stageX] === 2) {
           return true;
         }
       }
@@ -226,10 +221,16 @@ const SimpleTetris: React.FC = () => {
     const newPiece = nextTetromino;
     const pieceWidth = newPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - pieceWidth) / 2);
+    
+    if (checkCollision(startX, -1, newPiece.shape)) {
+      setGameOver(true);
+      setDropTime(null);
+      return;
+    }
 
     setCurrentTetromino(newPiece);
     setNextTetromino(randomTetromino());
-    setPosition({ x: startX, y: 0 });
+    setPosition({ x: startX, y: -1 });
   };
 
   // Move the tetromino
