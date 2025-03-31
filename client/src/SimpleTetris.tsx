@@ -308,25 +308,26 @@ const SimpleTetris: React.FC = () => {
     // Update position
     setPosition(prev => ({ ...prev, y: newY }));
 
-    // Create new stage with current piece
+    // Create a new stage with the dropped piece merged
     const newStage = stage.map(row => [...row]);
-
-    // Merge the tetromino at its final position
     currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
-          const boardY = newY + y;
-          const boardX = position.x + x;
-          if (boardY >= 0 && boardY < STAGE_HEIGHT) {
-            newStage[boardY][boardX] = 2;
+          const finalY = newY + y;
+          if (finalY >= 0 && finalY < STAGE_HEIGHT) {
+            newStage[finalY][position.x + x] = 2;
           }
         }
       });
     });
 
-    // Update stage and get new piece
+    // Update stage and spawn new piece
     setStage(newStage);
-    getNewTetromino();
+    const tetrominoWidth = nextTetromino.shape[0].length;
+    const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
+    setCurrentTetromino(nextTetromino);
+    setNextTetromino(randomTetromino());
+    setPosition({ x: startX, y: 0 });
   };
 
   // Start the game
