@@ -167,24 +167,24 @@ const SimpleTetris: React.FC = () => {
           return isTetroCell ? 2 : cell;
         })
       );
-      // Check for completed rows and create new stage with cleared rows moved down
+      // Clear completed rows and move rows down
       let rowsCleared = 0;
-      const newStageFinal = [];
-      
-      // Check each row from bottom to top
-      for (let y = STAGE_HEIGHT - 1; y >= 0; y--) {
-        const row = mergedStage[y];
-        
-        // If row is not complete, keep it
-        if (!row.every(cell => cell !== 0)) {
-          newStageFinal.unshift(row);
+      const newStageWithoutFullRows = [];
+
+      // First, collect non-full rows
+      for (let i = STAGE_HEIGHT - 1; i >= 0; i--) {
+        if (!mergedStage[i].every(cell => cell !== 0)) {
+          newStageWithoutFullRows.unshift(mergedStage[i]);
         } else {
           rowsCleared += 1;
-          // Add empty row at top
-          newStageFinal.push(Array(STAGE_WIDTH).fill(0));
         }
       }
-      
+
+      // Add empty rows at the top
+      while (newStageWithoutFullRows.length < STAGE_HEIGHT) {
+        newStageWithoutFullRows.unshift(Array(STAGE_WIDTH).fill(0));
+      }
+
       // Calculate score
       if (rowsCleared > 0) {
         setScore(prev => prev + rowsCleared * 100 * (level + 1));
@@ -196,10 +196,9 @@ const SimpleTetris: React.FC = () => {
           setDropTime(1000 / (level + 2) + 200);
         }
       }
-      
-      // Update stage with cleared rows
-      setStage(newStageFinal);
 
+      // Use the new stage with cleared rows
+      const clearedStage = newStageWithoutFullRows;
       // Get a new tetromino and reset position
       setCurrentTetromino(nextTetromino);
       getNewTetromino();
