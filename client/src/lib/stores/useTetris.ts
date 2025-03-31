@@ -28,14 +28,32 @@ export const useTetris = () => {
   const resetPlayer = useCallback(() => {
     const tetromino = randomTetromino();
     const startY = tetromino.shape.length === 4 ? -2 : -1; // Adjust Y based on piece height
+    const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
+    
+    // Check if spawn position is blocked
+    const isBlocked = tetromino.shape.some((row, y) =>
+      row.some((cell, x) => {
+        const boardY = startY + y;
+        if (cell !== 0 && boardY >= 0) {
+          return stage[boardY] && stage[boardY][startX + x] !== 0;
+        }
+        return false;
+      })
+    );
+
+    if (isBlocked) {
+      setGameStarted(false); // End the game
+      return;
+    }
+
     setPlayer({
-      pos: { x: STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2), y: startY },
+      pos: { x: startX, y: startY },
       tetromino: tetromino.shape,
       collided: false
     });
 
     setNextPiece(tetromino.type);
-  }, []);
+  }, [stage]);
 
   // Calculate score when rows are cleared
   const calcScore = useCallback((rowsCleared: number) => {
