@@ -94,7 +94,7 @@ const SimpleTetris: React.FC = () => {
 
   // Update the game stage
   const updateStage = () => {
-    // Copy the stage
+    // Copy the stage - keep settled cells (2) but clear active cells (1)
     const newStage = stage.map(row => 
       row.map(cell => (cell === 1 ? 0 : cell))
     );
@@ -115,10 +115,19 @@ const SimpleTetris: React.FC = () => {
       });
     });
 
-    // Check if we've collided with something
+    // Check if we've collided with something below us
     if (checkCollision(position.x, position.y + 1, currentTetromino.shape)) {
-      // Game over if it's colliding at the top
-      if (position.y < 1) {
+      // Only set game over if there's a collision at the very top of the board
+      // AND the piece hasn't had a chance to move down at all
+      // This means all of the piece is still above the board (y < 0)
+      const hasBlocksAboveBoard = currentTetromino.shape.some((row, y) => 
+        row.some((value, x) => 
+          value !== 0 && position.y + y < 0
+        )
+      );
+      
+      // Game over only if blocks are stuck above the visible board
+      if (hasBlocksAboveBoard) {
         console.log('Game Over!');
         setGameOver(true);
         setDropTime(null);
@@ -167,8 +176,17 @@ const SimpleTetris: React.FC = () => {
 
       // Get a new tetromino and reset position
       setCurrentTetromino(nextTetromino);
-      setNextTetromino(randomTetromino());
-      setPosition({ x: 3, y: 0 });
+      
+      // Generate the next tetromino for preview
+      const newNextTetromino = randomTetromino();
+      setNextTetromino(newNextTetromino);
+      
+      // Calculate position based on tetromino width to center it
+      const tetrominoWidth = nextTetromino.shape[0].length;
+      const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
+      
+      // Set the position
+      setPosition({ x: startX, y: 0 });
       
       // Update the stage with cleared rows
       setStage(clearedStage);
@@ -215,16 +233,34 @@ const SimpleTetris: React.FC = () => {
 
   // Start the game
   const startGame = () => {
+    // Reset all game state
     setStage(createStage());
     setScore(0);
     setRows(0);
     setLevel(0);
-    setCurrentTetromino(randomTetromino());
-    setNextTetromino(randomTetromino());
-    setPosition({ x: 3, y: 0 });
+    
+    // Get initial tetrominos
+    const firstTetromino = randomTetromino();
+    const secondTetromino = randomTetromino();
+    
+    // Set tetrominos
+    setCurrentTetromino(firstTetromino);
+    setNextTetromino(secondTetromino);
+    
+    // Calculate initial position based on tetromino width
+    // This ensures the piece is centered
+    const tetrominoWidth = firstTetromino.shape[0].length;
+    const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
+    
+    // Start with the tetromino fully visible on the board
+    setPosition({ x: startX, y: 0 });
+    
+    // Reset game state
     setGameOver(false);
     setGameStarted(true);
     setDropTime(1000);
+    
+    console.log('Game started with', firstTetromino);
   };
 
   // Update game - main game loop
@@ -236,7 +272,7 @@ const SimpleTetris: React.FC = () => {
       
       return () => clearInterval(gameLoop);
     }
-  }, [gameStarted, gameOver, stage, position]);
+  }, [gameStarted, gameOver, stage, position, currentTetromino]);
 
   // Auto drop the tetromino
   useEffect(() => {
@@ -247,7 +283,7 @@ const SimpleTetris: React.FC = () => {
       
       return () => clearInterval(dropTimer);
     }
-  }, [dropTime, gameStarted, gameOver, position]);
+  }, [dropTime, gameStarted, gameOver, position, currentTetromino.shape]);
 
   // Handle keyboard input
   useEffect(() => {
