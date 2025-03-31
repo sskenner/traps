@@ -154,10 +154,17 @@ const TetrisBoard: React.FC<Props> = ({
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
-      // Game over if collided at the top
-      if (player.pos.y < 1) {
+      // Game over conditions:
+      // 1. Collision at the very top (y < 1)
+      // 2. Collision while piece is partially above board (indicating stack reached top)
+      if (player.pos.y < 1 || player.tetromino.some((row, y) => 
+          row.some((cell, x) => {
+            const boardY = player.pos.y + y;
+            return cell !== 0 && boardY <= 0;
+          }))) {
         setGameOver(true);
         setDropTime(null);
+        return;
       }
       
       updatePlayerPos({ x: 0, y: 0, collided: true });
