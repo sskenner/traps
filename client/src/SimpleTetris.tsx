@@ -307,23 +307,7 @@ const SimpleTetris: React.FC = () => {
 
     // Create a new stage
     const newStage = stage.map(row => [...row]);
-    // Check if placing piece at new position would cause game over
-    let wouldCauseGameOver = false;
-    currentTetromino.shape.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if (value !== 0) {
-          if (newY + y < 2 && newStage[newY + y][position.x + x] === 2) {
-            wouldCauseGameOver = true;
-          }
-        }
-      });
-    });
-    if (wouldCauseGameOver) {
-      return; // Don't allow the hard drop if it would cause immediate game over
-    }
 
-    // Update position and merge the piece
-    setPosition(prev => ({ ...prev, y: newY }));
     // Merge the tetromino at its final position
     currentTetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
@@ -336,17 +320,49 @@ const SimpleTetris: React.FC = () => {
       });
     });
 
-    // Update stage
+    // Check for completed rows and remove them
+    let rowsCleared = 0;
+    for (let y = STAGE_HEIGHT - 1; y >= 0; y--) {
+      if (newStage[y].every(cell => cell === 2)) {
+        rowsCleared++;
+        // Remove the completed row and add an empty row at the top
+        newStage.splice(y, 1);
+        newStage.unshift(Array(STAGE_WIDTH).fill(0));
+        y++; // Check the same row again since we moved rows down
+      }
+    }
+
+    // Update score if rows were cleared
+    if (rowsCleared > 0) {
+      setScore(prev => prev + rowsCleared * 100 * (level + 1));
+      setRows(prev => prev + rowsCleared);
+      if ((rows + rowsCleared) >= (level + 1) * 10) {
+        setLevel(prev => prev + 1);
+        setDropTime(1000 / (level + 2) + 200);
+      }
+    }
+
+    // Update stage with cleared rows
     setStage(newStage);
-    // Spawn new piece with proper positioning
+
+    // Spawn new piece
     const nextPiece = nextTetromino;
     const newNextPiece = randomTetromino();
     setCurrentTetromino(nextPiece);
     setNextTetromino(newNextPiece);
+
     // Calculate center position for new piece
     const tetrominoWidth = nextPiece.shape[0].length;
     const startX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
-    setPosition({ x: startX, y: 0 });
+    
+    // Set the position and check if it's valid
+    const newPosition = { x: startX, y: 0 };
+    if (!checkCollision(startX, 0, nextPiece.shape)) {
+      setPosition(newPosition);
+    } else {
+      // Only trigger game over if the new piece can't be placed at spawn
+      setGameOver(true);
+    }
   };
 
   // Start the game
