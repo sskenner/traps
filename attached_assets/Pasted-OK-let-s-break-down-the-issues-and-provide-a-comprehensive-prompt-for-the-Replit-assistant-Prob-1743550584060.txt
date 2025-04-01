@@ -1,0 +1,39 @@
+OK, let's break down the issues and provide a comprehensive prompt for the Replit assistant.
+
+**Problems:**
+
+1.  **WebSocket Connection Error:** The application is failing to load due to a "Failed to construct WebSocket" error.
+    * Server is running at `ws://0.0.0.0:5000/ws`
+    * Client is trying to connect to `wss://localhost:undefined/`
+    * This indicates a mismatch in the WebSocket protocol (ws vs. wss), hostname (0.0.0.0 vs. localhost), and likely a port or path issue.
+2.  **`useEffect` Error in `MainMenu`:** The `MainMenu` component is throwing a "useEffect is not defined" error. This means the `useEffect` hook is either not imported or the component is not correctly defined as a functional component that can use hooks.
+3.  **Unclickable Buttons:** The buttons in the `MainMenu` component are not clickable, suggesting issues with event handlers, component rendering, or styling.
+
+**Prompt for Replit Assistant:**
+
+```
+The React application is encountering several issues:
+
+1.  **WebSocket Connection Error:**
+    * The WebSocket server is running at `ws://0.0.0.0:5000/ws`.
+    * The client is attempting to connect to `wss://localhost:undefined/`.
+    * This discrepancy is causing a "Failed to construct WebSocket" error and preventing the application from loading correctly.
+    * Please investigate and correct the WebSocket connection logic to ensure the client connects to the server using the correct protocol (`ws` or `wss`), hostname, port, and path. Pay close attention to how the WebSocket URL is constructed in the client-side code, especially in relation to environment variables or hardcoded values. Ensure that if the server is using `ws://`, the client attempts to connect to `ws://` and if the server is using `wss://` the client attempts to connect to `wss://`.
+
+2.  **`useEffect` Error in `MainMenu` Component:**
+    * The `MainMenu` component is throwing a "useEffect is not defined" error.
+    * Please ensure that the `MainMenu` component is correctly defined as a functional component and that the `useEffect` hook is imported from React if it's being used. If `useEffect` is not needed, ensure the component is a standard functional component.
+
+3.  **Unclickable Buttons in `MainMenu`:**
+    * The buttons in the `MainMenu` component are not clickable.
+    * Please verify the following:
+        * The `onClick` event handlers are correctly attached to the buttons and are calling the `onStartSinglePlayer` and `onStartMultiplayer` props.
+        * The `onStartSinglePlayer` and `onStartMultiplayer` props are being passed correctly from the `HomePage` component to the `MainMenu` component.
+        * There are no CSS styles that are preventing the cursor from changing to a pointer on hover or that are disabling pointer events. Add basic button styling if necessary to make them visually clickable.
+        * There are no other elements overlapping the buttons that might be intercepting the click events.
+        * The `MainMenu` component is being rendered correctly in the `HomePage` component's conditional rendering logic.
+
+Please address these three issues to ensure the application loads correctly, the WebSocket connection is established, and the buttons in the `MainMenu` component are clickable.
+```
+
+This prompt provides a detailed breakdown of the problems and gives the Replit assistant specific instructions on how to fix them. It covers the WebSocket connection error, the `useEffect` error, and the unclickable button issue.
