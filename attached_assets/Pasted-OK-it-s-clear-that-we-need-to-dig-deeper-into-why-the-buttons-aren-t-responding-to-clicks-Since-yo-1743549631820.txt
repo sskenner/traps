@@ -1,0 +1,89 @@
+OK, it's clear that we need to dig deeper into why the buttons aren't responding to clicks. Since you've confirmed that the basic `onClick` handlers and styling suggestions didn't resolve the issue, let's explore some more advanced debugging and potential problem areas.
+
+**1. Verify Component Rendering and Structure**
+
+   * **Conditional Rendering:** Double-check the conditional rendering logic in your `HomePage` component. Ensure that the `MainMenu` component is actually being rendered when the `gameMode` is `GameMode.MENU`. It's possible that a logic error is preventing it from appearing or that it's being unmounted immediately.
+
+     ```jsx
+     // index.tsx
+     {gameMode === GameMode.MENU && (
+       <MainMenu
+         onStartSinglePlayer={handleStartSinglePlayer}
+         onStartMultiplayer={handleStartMultiplayer}
+       />
+     )}
+     ```
+
+   * **Component Hierarchy:** Use your browser's developer tools to carefully inspect the HTML structure.
+     * Make sure the `MainMenu` component is in the correct place in the DOM.
+     * Look for any unexpected parent elements that might be overlapping or interfering with the buttons.
+     * Pay close attention to any elements with `position: absolute`, `position: fixed`, or `z-index` styles, as these can sometimes cause unexpected behavior.
+
+**2. Event Handling Issues**
+
+   * **Event Propagation:** It's possible that events are being captured or stopped by other elements.
+     * In your browser's developer tools, inspect the button elements.
+     * Go to the "Event Listeners" tab to see if any event listeners are attached to the button or its parent elements.
+     * Check if any of these listeners are calling `stopPropagation()` or `preventDefault()`, which could prevent the `onClick` event from firing.
+
+   * **Synthetic Events:** React uses synthetic events, which wrap the native browser events. In rare cases, there might be issues with how these synthetic events are handled.
+     * Try using the native `addEventListener` directly on the button elements (though this is generally not recommended in React). This is purely for debugging purposes to see if the native events work.
+
+     ```jsx
+     // Inside MainMenu component (for DEBUGGING ONLY)
+     useEffect(() => {
+       const singlePlayerButton = document.querySelector('#single-player-button'); // Add an ID to your button
+       const multiplayerButton = document.querySelector('#multiplayer-button'); // Add an ID to your button
+
+       if (singlePlayerButton) {
+         singlePlayerButton.addEventListener('click', onStartSinglePlayer);
+       }
+       if (multiplayerButton) {
+         multiplayerButton.addEventListener('click', onStartMultiplayer);
+       }
+
+       return () => {
+         if (singlePlayerButton) {
+           singlePlayerButton.removeEventListener('click', onStartSinglePlayer);
+         }
+         if (multiplayerButton) {
+           multiplayerButton.removeEventListener('click', onStartMultiplayer);
+         }
+       };
+     }, [onStartSinglePlayer, onStartMultiplayer]);
+
+     return (
+       <div>
+         <h1>TRAPS</h1>
+         <button id="single-player-button">SINGLE PLAYER</button>
+         <button id="multiplayer-button">MULTIPLAYER</button>
+       </div>
+     );
+     ```
+
+     * If this works, it suggests there might be a problem with React's synthetic event handling.
+
+**3. Styling Conflicts**
+
+   * **Global Styles:** Check for any global CSS styles that might be interfering with button behavior.
+     * Look for styles that are applied to all buttons or to elements that contain the buttons.
+     * Pay attention to styles that might be setting `pointer-events: none;` or other styles that disable interactivity.
+
+   * **CSS Frameworks/Libraries:** If you're using a CSS framework or library (e.g., Tailwind CSS, Material UI), make sure that the button styles are not being overridden or that the framework's components are being used correctly.
+     * Consult the framework's documentation for how to style and handle button clicks.
+
+**4. State Updates**
+
+   * **State Management:** Although unlikely, there could be a very subtle issue with how React's state is being updated.
+     * Ensure that the `handleStartSinglePlayer` and `handleStartMultiplayer` functions are being called correctly and that they are updating the `gameMode` state as expected.
+     * Add `console.log` statements inside these functions and after the `setGameMode` calls to verify that the state is changing.
+
+**Debugging Strategy**
+
+   1.  **Simplify:** Start with the simplest possible `MainMenu` component. Remove any extra styling or elements and just render the basic buttons with `onClick` handlers. If this works, gradually add complexity back until the problem reappears.
+
+   2.  **Isolate:** Try rendering the `MainMenu` component in isolation, outside of the `HomePage` component. This can help you determine if the problem is related to the parent component or its state.
+
+   3.  **Browser Developer Tools:** The browser's developer tools are your best friend. Use them extensively to inspect elements, check styles, examine event listeners, and debug JavaScript.
+
+I know this is a lot to consider, but by systematically checking these areas, you should be able to pinpoint the cause of the issue and get your buttons working. Let me know if you have any progress or if you have more questions as you debug!
