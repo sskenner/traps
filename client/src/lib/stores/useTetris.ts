@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { TETROMINOS, randomTetromino } from '../tetrominos';
+import { TETROMINOS, randomTetromino, TetrominoType } from '../tetrominos';
 import { STAGE_WIDTH, STAGE_HEIGHT, createStage, checkCollision } from '../gameHelpers';
 
 export const useTetris = () => {
@@ -143,33 +143,30 @@ export const useTetris = () => {
   const addGarbageLines = (numLines: number) => {
     setStage(prevStage => {
       // Create new empty stage
-      const newStage = createStage();
+      const newStage = [...prevStage.map(row => [...row])];
 
-      // Copy existing stage, but shift up by number of garbage lines
+      // Shift all existing blocks up by the number of lines
       for (let y = 0; y < STAGE_HEIGHT - numLines; y++) {
         for (let x = 0; x < STAGE_WIDTH; x++) {
-          if (y + numLines < prevStage.length) {
-            newStage[y][x] = prevStage[y + numLines][x];
-          }
+          // Move each cell up by numLines
+          newStage[y][x] = prevStage[y + numLines][x];
         }
       }
 
-      // Add garbage lines at the bottom
+      // Add blank lines at the bottom
       for (let i = 0; i < numLines; i++) {
         const y = STAGE_HEIGHT - i - 1;
-
-        // Create a garbage line with one random hole
-        const holePosition = Math.floor(Math.random() * STAGE_WIDTH);
-
+        
+        // Create a completely blank line at the bottom
         for (let x = 0; x < STAGE_WIDTH; x++) {
-          if (x !== holePosition) {
-            newStage[y][x] = [1, 'gray'];
-          }
+          newStage[y][x] = [0, 'clear'];
         }
       }
 
       return newStage;
     });
+    
+    console.log(`Added ${numLines} blank rows at the bottom, pushing everything up`);
   };
 
   // Update stage

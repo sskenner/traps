@@ -165,16 +165,18 @@ const MultiplayerGame: React.FC<Props> = ({
   
   // Handle sending garbage lines to opponent
   const handleLinesClear = (lines: number) => {
-    if (socket && lines > 1) {
-      // Send one less line than cleared (minimum 1)
-      const garbageLines = Math.max(1, lines - 1);
-      
+    if (socket && lines > 0) {
+      // Send one line for each line cleared
+      // This matches the expected behavior: a blank row should be added to the bottom of opponent's game
+      // for each row the player clears
       socket.send(JSON.stringify({
         type: 'garbage_lines',
         room: roomId,
         username,
-        lines: garbageLines
+        lines: lines
       }));
+      
+      console.log(`Sent ${lines} garbage lines to opponent`);
     }
   };
   

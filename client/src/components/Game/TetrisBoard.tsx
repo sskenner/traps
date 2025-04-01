@@ -176,6 +176,7 @@ const TetrisBoard: React.FC<Props> = ({
         
         // Notify parent about line clears if in multiplayer
         if (isMultiplayer && onLinesClear) {
+          console.log(`Cleared ${clearedRows} rows, sending to opponent`);
           onLinesClear(clearedRows);
         }
       } else {
@@ -211,6 +212,7 @@ const TetrisBoard: React.FC<Props> = ({
       
       // Notify parent about line clears if in multiplayer
       if (isMultiplayer && onLinesClear) {
+        console.log(`Hard drop cleared ${clearedRows} rows, sending to opponent`);
         onLinesClear(clearedRows);
       }
     }
