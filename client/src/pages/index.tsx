@@ -2,8 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { useTetris } from '@/lib/stores/useTetris';
 import MainMenu from '@/components/Menu/MainMenu';
 import MultiplayerLobby from '@/components/Multiplayer/MultiplayerLobby';
-import SinglePlayerGame from '@/components/SinglePlayer/SinglePlayerGame'; //Import added
-
 
 enum GameMode {
   MENU,
@@ -25,18 +23,17 @@ const HomePage: React.FC = () => {
   // Start single player mode
   const handleStartSinglePlayer = useCallback(() => {
     console.log("Starting single player mode from HomePage");
-    setGameMode(GameMode.SINGLE_PLAYER);
     resetGame();
+    setGameMode(GameMode.SINGLE_PLAYER);
+    console.log("Game mode updated to:", GameMode.SINGLE_PLAYER);
   }, [resetGame]);
 
   // Start multiplayer mode
   const handleStartMultiplayer = useCallback(() => {
     console.log("Starting multiplayer mode from HomePage");
     resetGame();
-    // Use setTimeout to ensure state is cleared before transitioning
-    setTimeout(() => {
-      setGameMode(GameMode.MULTIPLAYER);
-    }, 0);
+    setGameMode(GameMode.MULTIPLAYER);
+    console.log("Game mode updated to:", GameMode.MULTIPLAYER);
   }, [resetGame]);
 
   console.log("Current game mode:", GameMode[gameMode]);
