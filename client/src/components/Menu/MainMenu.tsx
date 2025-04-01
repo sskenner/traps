@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,32 +14,19 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
   const [showInstructions, setShowInstructions] = useState(false);
   const { isMuted, toggleMute } = useAudio();
 
-  // Handle button clicks with better error handling
   const handleSinglePlayerClick = useCallback(() => {
     console.log("Single Player button clicked");
-    // Add a small delay to mitigate any potential race conditions
-    setTimeout(() => {
-      try {
-        onStartSinglePlayer();
-      } catch (error) {
-        console.error("Error starting single player mode:", error);
-      }
-    }, 10);
+    onStartSinglePlayer();
   }, [onStartSinglePlayer]);
 
   const handleMultiplayerClick = useCallback(() => {
     console.log("Multiplayer button clicked");
-    try {
-      onStartMultiplayer();
-    } catch (error) {
-      console.error("Error starting multiplayer mode:", error);
-    }
+    onStartMultiplayer();
   }, [onStartMultiplayer]);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-blue-900 to-black">
       <div className="absolute top-0 left-0 w-full h-full opacity-10">
-        {/* Background tetromino pattern SVG */}
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
           <pattern id="tetrominoPattern" width="20" height="20" patternUnits="userSpaceOnUse">
             <rect x="0" y="0" width="5" height="5" fill="#FF0000" />
@@ -75,8 +63,8 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               <Button 
                 variant="tetris" 
                 size="lg" 
-                onClick={handleSinglePlayerClick} 
-                className="text-lg py-6 btn-tetris"
+                onClick={handleSinglePlayerClick}
+                className="text-lg py-6 cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all"
               >
                 Single Player
               </Button>
@@ -84,8 +72,8 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               <Button 
                 variant="tetris" 
                 size="lg" 
-                onClick={handleMultiplayerClick} 
-                className="text-lg py-6 btn-tetris"
+                onClick={handleMultiplayerClick}
+                className="text-lg py-6 cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all"
               >
                 Multiplayer
               </Button>
@@ -93,7 +81,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               <Button 
                 variant="outline" 
                 onClick={() => setShowInstructions(true)}
-                className="hover:bg-blue-50"
+                className="hover:bg-blue-50 cursor-pointer"
               >
                 How to Play
               </Button>
@@ -101,7 +89,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               <Button 
                 variant={isMuted ? 'outline' : 'secondary'} 
                 onClick={toggleMute}
-                className={isMuted ? 'hover:bg-blue-50' : ''}
+                className={`cursor-pointer ${isMuted ? 'hover:bg-blue-50' : ''}`}
               >
                 {isMuted ? 'Unmute Sound' : 'Mute Sound'}
               </Button>
