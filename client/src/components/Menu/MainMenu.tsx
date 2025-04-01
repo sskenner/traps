@@ -26,7 +26,8 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
     }, 10);
   }, [onStartSinglePlayer]);
 
-  const handleMultiplayerClick = useCallback(() => {
+  const handleMultiplayerClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
     console.log("Multiplayer button clicked");
     try {
       onStartMultiplayer();
