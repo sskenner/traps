@@ -14,15 +14,35 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
   const [showInstructions, setShowInstructions] = useState(false);
   const { isMuted, toggleMute } = useAudio();
 
-  const handleSinglePlayerClick = useCallback(() => {
-    console.log("Single Player button clicked");
-    onStartSinglePlayer();
+  const handleSinglePlayerClick = useCallback((e: React.MouseEvent) => {
+    console.log("Single Player button clicked", e.currentTarget);
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      onStartSinglePlayer();
+    } catch (error) {
+      console.error("Error in single player click:", error);
+    }
   }, [onStartSinglePlayer]);
 
-  const handleMultiplayerClick = useCallback(() => {
-    console.log("Multiplayer button clicked");
-    onStartMultiplayer();
+  const handleMultiplayerClick = useCallback((e: React.MouseEvent) => {
+    console.log("Multiplayer button clicked", e.currentTarget);
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      onStartMultiplayer();
+    } catch (error) {
+      console.error("Error in multiplayer click:", error);
+    }
   }, [onStartMultiplayer]);
+
+  // Verify component mount and props
+  useEffect(() => {
+    console.log("MainMenu mounted with props:", {
+      hasStartSinglePlayer: !!onStartSinglePlayer,
+      hasStartMultiplayer: !!onStartMultiplayer
+    });
+  }, [onStartSinglePlayer, onStartMultiplayer]);
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-blue-900 to-black">
@@ -64,7 +84,8 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
                 variant="tetris" 
                 size="lg" 
                 onClick={handleSinglePlayerClick}
-                className="text-lg py-6 cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all"
+                className="text-lg py-6 w-full cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-testid="single-player-button"
               >
                 Single Player
               </Button>
@@ -73,7 +94,8 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
                 variant="tetris" 
                 size="lg" 
                 onClick={handleMultiplayerClick}
-                className="text-lg py-6 cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all"
+                className="text-lg py-6 w-full cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-testid="multiplayer-button"
               >
                 Multiplayer
               </Button>

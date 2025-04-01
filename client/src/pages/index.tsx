@@ -23,18 +23,17 @@ const HomePage: React.FC = () => {
   // Start single player mode
   const handleStartSinglePlayer = useCallback(() => {
     console.log("Starting single player mode from HomePage");
-    setGameMode(GameMode.SINGLE_PLAYER);
     resetGame();
+    setGameMode(GameMode.SINGLE_PLAYER);
+    console.log("Game mode updated to:", GameMode.SINGLE_PLAYER);
   }, [resetGame]);
 
   // Start multiplayer mode
   const handleStartMultiplayer = useCallback(() => {
     console.log("Starting multiplayer mode from HomePage");
     resetGame();
-    // Ensure state updates are applied
-    requestAnimationFrame(() => {
-      setGameMode(GameMode.MULTIPLAYER);
-    });
+    setGameMode(GameMode.MULTIPLAYER);
+    console.log("Game mode updated to:", GameMode.MULTIPLAYER);
   }, [resetGame]);
 
   console.log("Current game mode:", GameMode[gameMode]);
