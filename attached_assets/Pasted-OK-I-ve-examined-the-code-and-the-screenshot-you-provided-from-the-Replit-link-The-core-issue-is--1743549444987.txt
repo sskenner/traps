@@ -1,0 +1,152 @@
+OK, I've examined the code and the screenshot you provided from the Replit link.
+
+The core issue is indeed within the `MainMenu` component, as suspected. The buttons are likely not wired up correctly or are missing essential styling.
+
+Here's a breakdown of how to fix this, focusing on the `MainMenu` component (which is not in the files you provided, but is essential to solve this):
+
+**1. Ensure `onClick` Handlers Are Correctly Attached**
+
+   You must make sure the `MainMenu` component uses the `onStartSinglePlayer` and `onStartMultiplayer` props correctly on the buttons.
+
+   ```jsx
+   // MainMenu.tsx (or .jsx)
+   import React from 'react';
+
+   interface MainMenuProps {
+     onStartSinglePlayer: () => void;
+     onStartMultiplayer: () => void;
+   }
+
+   const MainMenu: React.FC<MainMenuProps> = ({ onStartSinglePlayer, onStartMultiplayer }) => {
+     return (
+       <div>
+         <h1>TRAPS</h1>
+         <button onClick={onStartSinglePlayer}>SINGLE PLAYER</button>
+         <button onClick={onStartMultiplayer}>MULTIPLAYER</button>
+       </div>
+     );
+   };
+
+   export default MainMenu;
+   ```
+
+   * Make absolutely sure that the `onClick` handlers are present and correctly calling the functions passed as props.
+
+**2. Add Basic Button Styling**
+
+   The lack of visual indication that the buttons are clickable is a CSS issue. Add some basic styling to the buttons within the `MainMenu` component, either directly or by applying CSS classes.
+
+   ```jsx
+   // MainMenu.tsx (or .jsx)
+   import React from 'react';
+
+   interface MainMenuProps {
+     onStartSinglePlayer: () => void;
+     onStartMultiplayer: () => void;
+   }
+
+   const MainMenu: React.FC<MainMenuProps> = ({ onStartSinglePlayer, onStartMultiplayer }) => {
+     return (
+       <div>
+         <h1>TRAPS</h1>
+         <button 
+           onClick={onStartSinglePlayer}
+           style={{
+             cursor: 'pointer',
+             padding: '10px 20px',
+             fontSize: '16px',
+             backgroundColor: '#007bff', // Example blue
+             color: 'white',
+             border: 'none',
+             borderRadius: '5px',
+             margin: '5px',
+           }}
+         >
+           SINGLE PLAYER
+         </button>
+         <button
+           onClick={onStartMultiplayer}
+           style={{
+             cursor: 'pointer',
+             padding: '10px 20px',
+             fontSize: '16px',
+             backgroundColor: '#007bff',
+             color: 'white',
+             border: 'none',
+             borderRadius: '5px',
+             margin: '5px',
+           }}
+         >
+           MULTIPLAYER
+         </button>
+       </div>
+     );
+   };
+
+   export default MainMenu;
+   ```
+
+   * `cursor: 'pointer'` is essential to change the mouse cursor on hover.
+   * The other styles are basic button styles to make them look like buttons. Adjust as needed to match your design.
+   * It is highly recommended that you use a CSS file or a styling library instead of inline styles for better organization and maintainability.
+
+**3. Verify Prop Passing in `HomePage`**
+
+   Double-check that you are passing the `onStartSinglePlayer` and `onStartMultiplayer` callbacks correctly from your `HomePage` component to the `MainMenu` component. This part of your code was correct in the previous answer, but it's important to be sure:
+
+   ```jsx
+   // index.tsx
+   import React, { useState, useCallback } from 'react';
+   import { useTetris } from '@/lib/stores/useTetris';
+   import MainMenu from '@/components/Menu/MainMenu'; // <--- Make sure this path is correct
+   import MultiplayerLobby from '@/components/Multiplayer/MultiplayerLobby';
+   import SinglePlayerGame from '@/components/Game/SinglePlayerGame';
+
+   enum GameMode {
+     MENU,
+     SINGLE_PLAYER,
+     MULTIPLAYER
+   }
+
+   const HomePage: React.FC = () => {
+     const [gameMode, setGameMode] = useState<GameMode>(GameMode.MENU);
+     const { resetGame } = useTetris();
+
+     // ... (your callback functions - these were correct)
+
+     return (
+       <div>
+         {gameMode === GameMode.MENU && (
+           <MainMenu
+             onStartSinglePlayer={handleStartSinglePlayer}
+             onStartMultiplayer={handleStartMultiplayer} // <--- Passing the handlers
+           />
+         )}
+         {gameMode === GameMode.SINGLE_PLAYER && (
+           <SinglePlayerGame onMainMenu={handleMainMenu} />
+         )}
+         {gameMode === GameMode.MULTIPLAYER && (
+           <MultiplayerLobby onBack={handleMainMenu} />
+         )}
+       </div>
+     );
+   };
+
+   export default HomePage;
+   ```
+
+**Debugging Steps**
+
+   * **Console.log in `MainMenu`:** Add `console.log` statements inside the `MainMenu` component to verify that the props are being received and that the `onClick` handlers are being called.
+
+     ```jsx
+     <button onClick={() => { console.log("Single Player clicked"); onStartSinglePlayer(); }}>SINGLE PLAYER</button>
+     <button onClick={() => { console.log("Multiplayer clicked"); onStartMultiplayer(); }}>MULTIPLAYER</button>
+     ```
+
+   * **Inspect Elements:** Use your browser's developer tools (right-click, "Inspect" or "Inspect Element") to examine the button elements in the UI.
+     * Check if the `onClick` handlers are present in the HTML.
+     * Check the applied CSS styles to see if any styles are interfering with the button's appearance or behavior.
+     * Look for any overlapping elements that might be intercepting the clicks.
+
+By carefully checking these points, especially the `MainMenu` component's code and styling, you should be able to get the buttons working correctly.
