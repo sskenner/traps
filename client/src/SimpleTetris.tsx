@@ -297,19 +297,26 @@ const SimpleTetris: React.FC = () => {
 
     // Create a new stage
     const newStage = stage.map(row => [...row]);
-    // Check if placing piece at new position would cause game over
+    
+    // Only check for game over if the piece ends up at the very top
     let wouldCauseGameOver = false;
-    currentTetromino.shape.forEach((row, y) => {
-      row.forEach((value, x) => {
-        if (value !== 0) {
-          if (newY + y < 2 && newStage[newY + y][position.x + x] === 2) {
-            wouldCauseGameOver = true;
+    if (newY <= 1) {  // Only check if the piece lands near the top
+      currentTetromino.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const finalY = newY + y;
+            // Check if there's a collision with existing blocks at the spawn area
+            if (finalY <= 1 && newStage[finalY] && newStage[finalY][position.x + x] === 2) {
+              wouldCauseGameOver = true;
+            }
           }
-        }
+        });
       });
-    });
+    }
+    
     if (wouldCauseGameOver) {
-      return; // Don't allow the hard drop if it would cause immediate game over
+      setGameOver(true);
+      return;
     }
 
     // Update position and merge the piece
