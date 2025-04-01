@@ -31,8 +31,10 @@ const HomePage: React.FC = () => {
   // Start multiplayer mode
   const handleStartMultiplayer = useCallback(() => {
     console.log("Starting multiplayer mode from HomePage");
-    setGameMode(GameMode.MULTIPLAYER);
     resetGame();
+    setTimeout(() => {
+      setGameMode(GameMode.MULTIPLAYER);
+    }, 0);
   }, [resetGame]);
   
   console.log("Current game mode:", GameMode[gameMode]);
