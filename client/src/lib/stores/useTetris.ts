@@ -29,7 +29,7 @@ export const useTetris = () => {
     const tetromino = randomTetromino();
     const startY = tetromino.shape.length === 4 ? -2 : -1; // Adjust Y based on piece height
     const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
-    
+
     // Check if spawn position is blocked
     const isBlocked = tetromino.shape.some((row, y) =>
       row.some((cell, x) => {
@@ -156,7 +156,7 @@ export const useTetris = () => {
       // Add blank lines at the bottom
       for (let i = 0; i < numLines; i++) {
         const y = STAGE_HEIGHT - i - 1;
-        
+
         // Create a completely blank line at the bottom
         for (let x = 0; x < STAGE_WIDTH; x++) {
           newStage[y][x] = [0, 'clear'];
@@ -165,7 +165,7 @@ export const useTetris = () => {
 
       return newStage;
     });
-    
+
     console.log(`Added ${numLines} blank rows at the bottom, pushing everything up`);
   };
 
