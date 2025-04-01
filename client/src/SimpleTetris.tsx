@@ -297,24 +297,33 @@ const SimpleTetris: React.FC = () => {
 
     // Create a new stage
     const newStage = stage.map(row => [...row]);
+
+    // Update position
+    setPosition(prev => ({ ...prev, y: newY }));
     
-    // Only check for game over if the piece ends up at the very top
-    let wouldCauseGameOver = false;
-    if (newY <= 1) {  // Only check if the piece lands near the top
-      currentTetromino.shape.forEach((row, y) => {
-        row.forEach((value, x) => {
-          if (value !== 0) {
-            const finalY = newY + y;
-            // Check if there's a collision with existing blocks at the spawn area
-            if (finalY <= 1 && newStage[finalY] && newStage[finalY][position.x + x] === 2) {
-              wouldCauseGameOver = true;
-            }
+    // Merge the tetromino into stage
+    currentTetromino.shape.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value !== 0) {
+          const finalY = newY + y;
+          if (finalY >= 0 && finalY < STAGE_HEIGHT) {
+            newStage[finalY][position.x + x] = 2;
           }
-        });
+        }
       });
-    }
-    
-    if (wouldCauseGameOver) {
+    });
+
+    // Set the stage with merged piece
+    setStage(newStage);
+
+    // Get next piece and check if it can be placed at spawn
+    const nextPiece = nextTetromino;
+    const spawnY = 0;
+    const tetrominoWidth = nextPiece.shape[0].length;
+    const spawnX = Math.floor((STAGE_WIDTH - tetrominoWidth) / 2);
+
+    // Only set game over if the next piece can't be placed at spawn
+    if (checkCollision(spawnX, spawnY, nextPiece.shape)) {
       setGameOver(true);
       return;
     }
