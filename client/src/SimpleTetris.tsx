@@ -167,27 +167,34 @@ const SimpleTetris: React.FC = () => {
           return isTetroCell ? 2 : cell;
         })
       );
-      // Check for completed rows
+      // Check for completed rows and move them down
       let rowsCleared = 0;
-      const clearedStage = mergedStage.map(row => {
-        // If every cell in the row is not empty
-        if (row.every(cell => cell !== 0)) {
-          rowsCleared += 1;
-          // Return an empty row
-          return Array(STAGE_WIDTH).fill(0);
+      const newStageWithClearedRows = Array(STAGE_HEIGHT).fill(null).map(() => Array(STAGE_WIDTH).fill(0));
+      let targetRow = STAGE_HEIGHT - 1;
+
+      // Start from bottom, only keep non-complete rows
+      for (let row = STAGE_HEIGHT - 1; row >= 0; row--) {
+        if (!mergedStage[row].every(cell => cell === 2)) {
+          // Copy non-complete row to new position
+          newStageWithClearedRows[targetRow] = [...mergedStage[row]];
+          targetRow--;
+        } else {
+          rowsCleared++;
         }
-        return row;
-      });
-      // Calculate score
+      }
+
+      // Calculate score and update level
       if (rowsCleared > 0) {
         setScore(prev => prev + rowsCleared * 100 * (level + 1));
-        setRows(prev => prev + rowsCleared);
-
-        // Increase level for every 10 rows cleared
-        if ((rows + rowsCleared) >= (level + 1) * 10) {
-          setLevel(prev => prev + 1);
-          setDropTime(1000 / (level + 2) + 200);
-        }
+        setRows(prev => {
+          const newRows = prev + rowsCleared;
+          // Check for level up
+          if (newRows >= (level + 1) * 10) {
+            setLevel(prev => prev + 1);
+            setDropTime(1000 / (level + 2) + 200);
+          }
+          return newRows;
+        });
       }
 
       // Get a new tetromino and reset position
@@ -202,7 +209,7 @@ const SimpleTetris: React.FC = () => {
       // Set the position
       setPosition({ x: startX, y: 0 });
       // Update the stage with cleared rows
-      setStage(clearedStage);
+      setStage(newStageWithClearedRows);
     } else {
       // Simply update the stage
       setStage(newStage);
