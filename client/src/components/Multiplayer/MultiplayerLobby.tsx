@@ -30,10 +30,8 @@ const MultiplayerLobby: React.FC<Props> = ({ onBack }) => {
     try {
       // Get the hostname from the current URL
       const hostname = window.location.hostname;
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      
-      // For Replit, use the same host without specifying the port
-      const wsUrl = `${protocol}//${hostname}/ws`;
+      // Always use the same host and port as the server
+      const wsUrl = `ws://${window.location.host}/ws`;
       
       console.log('Connecting to WebSocket at:', wsUrl);
       ws = new WebSocket(wsUrl);

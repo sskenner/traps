@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -93,7 +92,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               >
                 Single Player
               </Button>
-              
+
               <Button 
                 variant="tetris" 
                 size="lg" 
@@ -103,7 +102,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               >
                 Multiplayer
               </Button>
-              
+
               <Button 
                 variant="outline" 
                 onClick={() => setShowInstructions(true)}
@@ -111,7 +110,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               >
                 How to Play
               </Button>
-              
+
               <Button 
                 variant={isMuted ? 'outline' : 'secondary'} 
                 onClick={toggleMute}
@@ -119,7 +118,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
               >
                 {isMuted ? 'Unmute Sound' : 'Mute Sound'}
               </Button>
-              
+
               <div className="mt-4 text-center text-xs text-gray-500">
                 <p>Music and sound effects from freesound.org</p>
                 <p>© 2025 Tetris Game</p>
