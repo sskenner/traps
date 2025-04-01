@@ -66,10 +66,18 @@
 
 button {
   cursor: pointer;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 button:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
 }
 
 /* Game board settings for different screen sizes */

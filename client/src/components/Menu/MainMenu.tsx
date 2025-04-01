@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import Instructions from './Instructions';
 import { useAudio } from '@/lib/stores/useAudio';
 
-interface Props {
+interface MainMenuProps {
   onStartSinglePlayer: () => void;
   onStartMultiplayer: () => void;
 }
 
-const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) => {
+const MainMenu: React.FC<MainMenuProps> = ({ onStartSinglePlayer, onStartMultiplayer }) => {
   const [showInstructions, setShowInstructions] = useState(false);
   const { isMuted, toggleMute } = useAudio();
 
@@ -39,7 +39,6 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
     }
   }, [onStartMultiplayer]);
 
-  // Verify component mount and props
   useEffect(() => {
     console.log("MainMenu mounted with props:", {
       hasStartSinglePlayer: !!onStartSinglePlayer,
@@ -83,9 +82,9 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
             </>
           ) : (
             <>
-              <Button 
-                variant="tetris" 
-                size="lg" 
+              <Button
+                variant="tetris"
+                size="lg"
                 onClick={handleSinglePlayerClick}
                 className="text-lg py-6 w-full cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                 data-testid="single-player-button"
@@ -93,9 +92,9 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
                 Single Player
               </Button>
 
-              <Button 
-                variant="tetris" 
-                size="lg" 
+              <Button
+                variant="tetris"
+                size="lg"
                 onClick={handleMultiplayerClick}
                 className="text-lg py-6 w-full cursor-pointer hover:opacity-90 hover:transform hover:translate-y-[-2px] transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
                 data-testid="multiplayer-button"
@@ -103,16 +102,16 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
                 Multiplayer
               </Button>
 
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setShowInstructions(true)}
                 className="hover:bg-blue-50 cursor-pointer"
               >
                 How to Play
               </Button>
 
-              <Button 
-                variant={isMuted ? 'outline' : 'secondary'} 
+              <Button
+                variant={isMuted ? 'outline' : 'secondary'}
                 onClick={toggleMute}
                 className={`cursor-pointer ${isMuted ? 'hover:bg-blue-50' : ''}`}
               >
