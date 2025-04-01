@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Instructions from './Instructions';
@@ -14,25 +14,29 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
   const [showInstructions, setShowInstructions] = useState(false);
   const { isMuted, toggleMute } = useAudio();
 
-  const handleSinglePlayerClick = useCallback((e: React.MouseEvent) => {
-    console.log("Single Player button clicked", e.currentTarget);
-    e.stopPropagation();
-    e.preventDefault();
-    try {
-      onStartSinglePlayer();
-    } catch (error) {
-      console.error("Error in single player click:", error);
+  const handleSinglePlayerClick = useCallback(() => {
+    console.log("Single Player button clicked");
+    if (typeof onStartSinglePlayer === 'function') {
+      try {
+        onStartSinglePlayer();
+      } catch (error) {
+        console.error("Error in single player click:", error);
+      }
+    } else {
+      console.error("onStartSinglePlayer is not a function");
     }
   }, [onStartSinglePlayer]);
 
-  const handleMultiplayerClick = useCallback((e: React.MouseEvent) => {
-    console.log("Multiplayer button clicked", e.currentTarget);
-    e.stopPropagation();
-    e.preventDefault();
-    try {
-      onStartMultiplayer();
-    } catch (error) {
-      console.error("Error in multiplayer click:", error);
+  const handleMultiplayerClick = useCallback(() => {
+    console.log("Multiplayer button clicked");
+    if (typeof onStartMultiplayer === 'function') {
+      try {
+        onStartMultiplayer();
+      } catch (error) {
+        console.error("Error in multiplayer click:", error);
+      }
+    } else {
+      console.error("onStartMultiplayer is not a function");
     }
   }, [onStartMultiplayer]);
 
