@@ -55,7 +55,7 @@ const MainMenu: React.FC<Props> = ({ onStartSinglePlayer, onStartMultiplayer }) 
       <Card className="w-full max-w-md mx-4 bg-opacity-90 bg-card">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-4xl font-bold tracking-tight text-blue-500">
-            TETRIS
+            tRAPS
           </CardTitle>
           <CardDescription className="text-lg">
             The Classic Block Stacking Game

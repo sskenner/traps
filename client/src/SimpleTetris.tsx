@@ -477,7 +477,7 @@ const SimpleTetris: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-gray-900">
       <div className="mb-6">
-        <h1 className="text-4xl font-bold text-blue-400 text-center">TETRIS</h1>
+        <h1 className="text-4xl font-bold text-blue-400 text-center">tRAPS</h1>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
