@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useTetris } from '@/lib/stores/useTetris';
 import MainMenu from '@/components/Menu/MainMenu';
 import MultiplayerLobby from '@/components/Multiplayer/MultiplayerLobby';
+import SinglePlayerGame from '@/components/Game/SinglePlayerGame';
 
 enum GameMode {
   MENU,

@@ -285,10 +285,10 @@ export const useTetris = () => {
   }, [gameStarted, updateStage]);
 
   const movePlayer = (dir: number) => {
-    const collision = checkCollision(player.pos.x + dir, player.pos.y, player.tetromino);
-    if (collision === 'gameover') {
-      setGameStarted(false);
-    } else if (!collision) {
+    if (!player.tetromino || !gameStarted) return;
+    
+    const collision = checkCollision(player, stage, { x: dir, y: 0 });
+    if (!collision) {
       setPlayer(prev => ({
         ...prev,
         pos: { x: prev.pos.x + dir, y: prev.pos.y }
