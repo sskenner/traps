@@ -59,22 +59,6 @@ const TetrisBoard: React.FC<Props> = ({
     let gameLoop: NodeJS.Timeout | null = null;
 
     if (gameStarted && !gameOver && dropTime !== null && !isOpponent) {
-      // Initial render of current piece
-      if (player.tetromino && player.pos) {
-        const newStage = [...stage];
-        player.tetromino.forEach((row, y) => {
-          row.forEach((value, x) => {
-            if (value !== 0) {
-              const boardY = y + player.pos.y;
-              const boardX = x + player.pos.x;
-              if (boardY >= 0 && boardY < stage.length && boardX >= 0 && boardX < stage[0].length) {
-                newStage[boardY][boardX] = [value, 'clear'];
-              }
-            }
-          });
-        });
-      }
-
       gameLoop = setInterval(() => {
         dropPlayer();
       }, dropTime);
@@ -85,7 +69,7 @@ const TetrisBoard: React.FC<Props> = ({
         clearInterval(gameLoop);
       }
     };
-  }, [gameStarted, gameOver, dropTime, dropPlayer, isOpponent, player, stage]);
+  }, [gameStarted, gameOver, dropTime, dropPlayer, isOpponent]);
 
   // Start game background music
   useEffect(() => {
