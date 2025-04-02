@@ -17,8 +17,8 @@ export const useTetris = () => {
   // Player state
   const [player, setPlayer] = useState({
     pos: { x: STAGE_WIDTH / 2 - 1, y: 0 },
-    tetromino: TETROMINOS[0].shape,
-    color: TETROMINOS[0].color,
+    tetromino: TETROMINOS['I'].shape,
+    color: TETROMINOS['I'].color,
     collided: false,
   });
 
@@ -253,11 +253,10 @@ export const useTetris = () => {
     setGameStarted(true);
     
     // Initialize first piece
-    const firstTetrominoType = randomTetromino();
-    const firstPiece = TETROMINOS[firstTetrominoType];
+    const firstType = randomTetromino();
+    const firstPiece = TETROMINOS[firstType];
     const startX = STAGE_WIDTH / 2 - Math.floor(firstPiece.shape[0].length / 2);
     
-    // Initialize player with complete tetromino object including color
     setPlayer({
       pos: { x: startX, y: 0 },
       tetromino: firstPiece.shape,
@@ -265,8 +264,12 @@ export const useTetris = () => {
       collided: false
     });
     
-    // Set next piece type
-    setNextPiece(firstTetrominoType);
+    // Generate and set next piece
+    const nextType = randomTetromino();
+    setNextPiece(nextType);
+    
+    // Force immediate stage update
+    setStage(createStage());
     
     // Force stage update after a brief delay to ensure state is updated
     setTimeout(() => {
