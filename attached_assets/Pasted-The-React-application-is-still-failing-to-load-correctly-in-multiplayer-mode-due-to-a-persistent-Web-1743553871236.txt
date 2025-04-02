@@ -1,0 +1,22 @@
+The React application is still failing to load correctly in multiplayer mode due to a persistent WebSocket connection error: "Failed to construct WebSocket". The previous attempt to fix this by adjusting the WebSocket URL construction has not been successful.
+
+The WebSocket server is running at `ws://0.0.0.0:5000/ws`. The client is attempting to connect to `wss://traps2.replit.app/`.
+
+**Action:** The absolute priority is to resolve this WebSocket connection error. Please re-evaluate the WebSocket connection logic on both the client and server sides, focusing on the following:
+
+1.  **Protocol Mismatch:** The server is using `ws://` and the client is trying to connect with `wss://`. This protocol mismatch is a likely cause of the connection failure. Ensure that the client is explicitly configured to use the `ws://` protocol to match the server. Review the code in `client/src/components/Multiplayer/MultiplayerLobby.tsx` where the `WebSocket` object is created.
+
+2.  **Hostname and Port in Production:** While the previous attempt aimed to use the hostname from the browser, the current attempt to connect to `wss://traps2.replit.app/` might still be incorrect.
+    * **Replit Deployment:** Understand how Replit handles WebSocket connections in deployed applications. Does it automatically handle SSL termination and proxy WebSocket connections? If so, what is the correct URL structure to use? It's possible that Replit requires a specific subdomain or path for WebSocket connections in production.
+    * **Explicit Port:** Even if Replit handles the standard ports (80/443), explicitly including the port might be necessary or might clarify the connection. Try explicitly using port 80 for `ws://`.
+
+3.  **Server Configuration:** Double-check the server-side code in `server/socketServer.ts` to ensure it's correctly listening for WebSocket connections on `0.0.0.0:5000/ws` and that there are no issues with the WebSocket server setup that might be preventing connections from domains other than `localhost`.
+
+**Debugging Steps:**
+
+* **Client-Side WebSocket URL Construction:** Carefully review the code in `client/src/components/Multiplayer/MultiplayerLobby.tsx` where the `WebSocket` object is created. Log the exact `wsURL` being constructed before attempting the connection.
+* **Server-Side WebSocket Configuration:** Examine the server-side code to confirm the WebSocket server is initialized correctly and is not restricted to specific origins.
+* **Network Tab Inspection:** Use the browser's Network tab, specifically the "WS" (WebSocket) filter, to observe the *exact* URL being used for the connection attempt and any error messages. Pay close attention to the status code and error details.
+* **Replit Documentation:** Consult the Replit documentation for specific instructions on handling WebSocket connections in deployed applications. There might be specific configurations or URL formats required.
+
+**It is absolutely critical to resolve the "Failed to construct WebSocket" error first. The game cannot function in multiplayer without a stable WebSocket connection.** Please focus solely on diagnosing and fixing this connection issue. Once resolved, we can then address the falling pieces if they are still not showing.
