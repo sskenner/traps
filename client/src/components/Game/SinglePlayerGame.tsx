@@ -38,12 +38,8 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
       const dropTime = 1000 / (level + 1) + 200;
       dropTimer = setInterval(() => {
         dropPlayer();
+        updateStage();
       }, dropTime);
-    }
-
-    // Initial piece setup
-    if (gameStarted && !player.tetromino) {
-      resetPlayer();
     }
 
     return () => {
@@ -51,14 +47,7 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
         clearInterval(dropTimer);
       }
     };
-  }, [gameStarted, gameOver, level, dropPlayer, player.tetromino, resetPlayer]);
-
-  // Stage updates
-  useEffect(() => {
-    if (gameStarted && !gameOver) {
-      updateStage();
-    }
-  }, [gameStarted, gameOver, player, updateStage]);
+  }, [gameStarted, gameOver, level, dropPlayer, updateStage]);
 
   // Handle keyboard controls
   useEffect(() => {
