@@ -1,0 +1,24 @@
+The React application is failing to load correctly in multiplayer mode due to a persistent WebSocket connection error: "Failed to construct WebSocket". This error is preventing the real-time communication necessary for the game to function.
+
+The WebSocket server is running at `ws://0.0.0.0:5000/ws`. The client is attempting to connect to `wss://localhost:undefined/`.
+
+**Action:** The immediate priority is to resolve this WebSocket connection error. Please thoroughly investigate and correct the WebSocket connection logic on both the client and server sides.
+
+Specifically, address the following:
+
+1.  **Protocol Mismatch:** The server is using `ws://` and the client is trying to connect with `wss://`. Ensure that the client is configured to use the `ws://` protocol to match the server.
+
+2.  **Hostname and Port:** The server is running on `0.0.0.0:5000`. The client is trying to connect to `localhost:undefined`.
+    * Verify how the WebSocket URL is constructed on the client. It should be dynamically generated based on the server's actual address and port, especially in a deployed environment. Avoid hardcoding `localhost`.
+    * Ensure the client is using the correct port (`5000`) in the WebSocket URL. The `undefined` in the client's attempt indicates a problem with how the port is being determined.
+
+3.  **Path:** Ensure the client is connecting to the correct path on the server (`/ws`).
+
+**Debugging Steps:**
+
+* **Client-Side WebSocket URL Construction:** Carefully review the code where the `WebSocket` object is created in the client. Pay attention to how the `wsURL` is being generated. Look for environment variables, configuration files, or any logic that determines the WebSocket address.
+* **Server-Side WebSocket Configuration:** Double-check the server-side code to confirm it's listening on `0.0.0.0:5000/ws` and that there are no issues with the WebSocket server setup.
+* **Network Tab Inspection:** Use the browser's Network tab, specifically the "WS" (WebSocket) filter, to observe the initial connection attempts and any error messages.
+* **Console Logging:** Add detailed `console.log` statements on both the client and server to track the WebSocket connection process, including the URL being used by the client and any connection events on the server.
+
+**It is crucial to establish a stable WebSocket connection first. Once the connection is working correctly, we can then investigate if the falling pieces issue persists.** The current connection error is likely preventing any game data from being exchanged.
