@@ -18,11 +18,24 @@ const TetrisBoard: React.FC<Props> = ({
   gameData,
   onLinesClear 
 }) => {
-  console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent });
+  console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent, player });
 
   // Safety check - if we're in single player mode, ensure we don't use any multiplayer props
   if (!isMultiplayer && (gameData || onLinesClear)) {
     console.warn("WebSocket props passed to single player TetrisBoard - ignoring");
+  }
+
+  // Return empty stage if player is not properly initialized
+  if (!player || !player.tetromino || !player.pos) {
+    console.warn("Player state not properly initialized");
+    return (
+      <div style={{ 
+        width: STAGE_WIDTH * CELL_SIZE, 
+        height: STAGE_HEIGHT * CELL_SIZE,
+        backgroundColor: '#111',
+        border: '2px solid #333'
+      }} />
+    );
   }
 
   const { backgroundMusic, playHit, playSuccess, isMuted } = useAudio();
