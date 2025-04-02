@@ -90,22 +90,29 @@ export const useTetris = () => {
 
   // Update player position
   const updatePlayerPos = ({ x, y, collided }: { x: number; y: number; collided: boolean }) => {
-    if (!player.tetromino || !player.pos) return;
+    if (!player.tetromino || !player.pos) {
+      console.warn('Invalid player state during position update');
+      return;
+    }
     
     const newPos = { x: player.pos.x + x, y: player.pos.y + y };
     const hasCollision = checkCollision(player, stage, { x, y });
     
     if (!hasCollision) {
+      console.log('Moving piece to:', newPos);
       setPlayer(prev => ({
         ...prev,
         pos: newPos,
         collided,
       }));
     } else if (y > 0) { // Only set collided if moving downward
+      console.log('Collision detected during downward movement');
       setPlayer(prev => ({
         ...prev,
         collided: true,
       }));
+      // Force stage update on collision
+      updateStage();
     }
   };
 

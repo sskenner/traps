@@ -32,16 +32,20 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
       const dropTime = 1000 - (level * 50); // Decrease interval as level increases
       
       const gameLoop = setInterval(() => {
-        // Move piece down
+        console.log("Moving piece down");
         updatePlayerPos({ x: 0, y: 1, collided: false });
         updateStage();
       }, dropTime);
+      
+      // Initial piece drop after game starts
+      updatePlayerPos({ x: 0, y: 1, collided: false });
+      updateStage();
       
       return () => {
         clearInterval(gameLoop);
       };
     }
-  }, [gameStarted, gameOver, updateStage, level]);
+  }, [gameStarted, gameOver, level]);
   
   // Effect to check for game over
   useEffect(() => {
