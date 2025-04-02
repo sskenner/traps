@@ -261,18 +261,31 @@ const TetrisBoard: React.FC<Props> = ({
       >
         <Layer>
           {stage.map((row, y) =>
-            row.map((cell, x) => (
-              <Rect
-                key={`${x}-${y}`}
-                x={x * CELL_SIZE}
-                y={y * CELL_SIZE}
-                width={CELL_SIZE - 1}
-                height={CELL_SIZE - 1}
-                fill={cell[0] === 0 ? '#111' : cell[0] === 1 ? (player.tetromino ? player.color : '#00f0f0') : cell[1]}
-                stroke="#333"
-                strokeWidth={0.5}
-              />
-            ))
+            row.map((cell, x) => {
+              // Check if we're drawing an active tetromino cell
+              const isActivePiece = gameStarted && player.tetromino && 
+                player.pos.y + y >= 0 &&
+                player.tetromino.some((row, dy) => 
+                  row.some((value, dx) => 
+                    value !== 0 && 
+                    y === player.pos.y + dy && 
+                    x === player.pos.x + dx
+                  )
+                );
+
+              return (
+                <Rect
+                  key={`${x}-${y}`}
+                  x={x * CELL_SIZE}
+                  y={y * CELL_SIZE}
+                  width={CELL_SIZE - 1}
+                  height={CELL_SIZE - 1}
+                  fill={isActivePiece ? player.color : (cell[0] ? cell[1] : '#111')}
+                  stroke="#333"
+                  strokeWidth={0.5}
+                />
+              );
+            })
           )}
         </Layer>
       </Stage>
