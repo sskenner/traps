@@ -16,30 +16,45 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     player,
     score,
     rows,
-    level,
+    level, 
     nextPiece,
     gameStarted,
     startGame,
     resetGame,
     updateStage,
+    updatePlayerPos,
     dropPlayer,
     movePlayer,
     rotatePlayer,
     stage
   } = useTetris();
-  
+
   const [gameOver, setGameOver] = useState(false);
-  
+  const [dropTime, setDropTime] = useState<number | null>(null);
+
+  // Handle automatic drops
+  useEffect(() => {
+    if (!gameStarted || gameOver) {
+      setDropTime(null);
+      return;
+    }
+
+    setDropTime(1000 / (level + 1) + 200);
+  }, [level, gameStarted, gameOver]);
+
   // Game Loop
   useEffect(() => {
     let dropTimer: NodeJS.Timeout | null = null;
 
-    if (gameStarted && !gameOver) {
-      const dropTime = 1000 / (level + 1) + 200;
-      dropTimer = setInterval(() => {
-        dropPlayer();
-        updateStage();
-      }, dropTime);
+    const drop = () => {
+      if (!gameStarted || gameOver) return;
+
+      dropPlayer();
+      updateStage();
+    };
+
+    if (dropTime !== null) {
+      dropTimer = setInterval(drop, dropTime);
     }
 
     return () => {
@@ -47,7 +62,49 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
         clearInterval(dropTimer);
       }
     };
-  }, [gameStarted, gameOver, level, dropPlayer, updateStage]);
+  }, [dropTime, gameStarted, gameOver, dropPlayer, updateStage]);
+
+  // Handle key input
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!gameStarted || gameOver) return;
+
+      switch (event.code) {
+        case 'ArrowLeft':
+          movePlayer(-1);
+          break;
+        case 'ArrowRight':
+          movePlayer(1);
+          break;
+        case 'ArrowDown':
+          setDropTime(30);
+          break;
+        case 'ArrowUp':
+          rotatePlayer(stage);
+          break;
+        case 'Space':
+          event.preventDefault();
+          // Implement hard drop here if needed
+          break;
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (!gameStarted || gameOver) return;
+
+      if (event.code === 'ArrowDown') {
+        setDropTime(1000 / (level + 1) + 200);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [gameStarted, gameOver, level, movePlayer, rotatePlayer, stage]);
 
   // Handle keyboard controls
   useEffect(() => {
