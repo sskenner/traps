@@ -22,29 +22,66 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     startGame,
     resetGame,
     updateStage,
-    updatePlayerPos,
-    dropPlayer
+    dropPlayer,
+    movePlayer,
+    rotatePlayer,
+    stage
   } = useTetris();
   
   const [gameOver, setGameOver] = useState(false);
   
-  // Effect to update the game stage and handle piece falling
+  // Game Loop
   useEffect(() => {
+    let dropTimer: NodeJS.Timeout | null = null;
+
     if (gameStarted && !gameOver) {
-      const dropTime = 1000 - (level * 50); // Decrease interval as level increases
-      
-      const gameLoop = setInterval(() => {
+      const dropTime = 1000 / (level + 1) + 200;
+      dropTimer = setInterval(() => {
         dropPlayer();
         updateStage();
       }, dropTime);
-      
-      return () => {
-        clearInterval(gameLoop);
-      };
     }
+
+    return () => {
+      if (dropTimer) {
+        clearInterval(dropTimer);
+      }
+    };
   }, [gameStarted, gameOver, level, dropPlayer, updateStage]);
+
+  // Handle keyboard controls
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!gameStarted || gameOver) return;
+
+      switch (event.code) {
+        case 'ArrowLeft':
+          movePlayer(-1);
+          break;
+        case 'ArrowRight':
+          movePlayer(1);
+          break;
+        case 'ArrowDown':
+          dropPlayer();
+          break;
+        case 'ArrowUp':
+          rotatePlayer(stage);
+          break;
+        case 'Space':
+          // Hard drop implementation would go here
+          break;
+        default:
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [gameStarted, gameOver, movePlayer, dropPlayer, rotatePlayer, stage]);
   
-  // Effect to check for game over
+  // Check for game over
   useEffect(() => {
     if (player.collided && player.pos.y < 1 && gameStarted) {
       console.log("Game over detected");
