@@ -255,12 +255,19 @@ export const useTetris = () => {
     const firstTetrominoType = randomTetromino();
     const firstPiece = TETROMINOS[firstTetrominoType];
     const startX = STAGE_WIDTH / 2 - Math.floor(firstPiece.shape[0].length / 2);
+    
+    // Initialize player with complete tetromino object
     setPlayer({
       pos: { x: startX, y: 0 },
       tetromino: firstPiece.shape,
       collided: false
     });
+    
+    // Set next piece type
     setNextPiece(firstTetrominoType);
+    
+    // Force stage update
+    updateStage();
   };
 
   // Reset the game
