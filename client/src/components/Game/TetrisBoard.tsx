@@ -144,22 +144,16 @@ const TetrisBoard: React.FC<Props> = ({
 
       switch (e.code) {
         case 'ArrowLeft':
-          if (!checkCollision(player, stage, { x: -1, y: 0 })) {
-            updatePlayerPos({ x: -1, y: 0, collided: false });
-          }
+          movePlayer(-1);
           break;
         case 'ArrowRight':
-          if (!checkCollision(player, stage, { x: 1, y: 0 })) {
-            updatePlayerPos({ x: 1, y: 0, collided: false });
-          }
+          movePlayer(1);
           break;
         case 'ArrowDown':
-          if (!checkCollision(player, stage, { x: 0, y: 1 })) {
-            updatePlayerPos({ x: 0, y: 1, collided: false });
-          }
+          dropPlayer();
           break;
         case 'ArrowUp':
-          rotatePlayerPiece();
+          rotatePlayer(stage);
           break;
         case 'Space':
           hardDrop();
