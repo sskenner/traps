@@ -236,10 +236,13 @@ const TetrisBoard: React.FC<Props> = ({
   const renderStage = () => {
     return stage.map((row, y) =>
       row.map((cell, x) => {
+        // Get colors from TETROMINOS for consistency
         let fillColor = '#111';
-        if (cell[0] === 1 && player.tetromino) {
-          fillColor = player.color || '#00f0f0';
+        if (cell[0] === 1) {
+          // Active piece - use current piece color
+          fillColor = player.tetromino ? player.color : '#00f0f0';
         } else if (cell[0] === 2) {
+          // Settled piece - use saved color or default
           fillColor = cell[1] || '#666';
         }
 
@@ -251,7 +254,7 @@ const TetrisBoard: React.FC<Props> = ({
             width={CELL_SIZE - 1}
             height={CELL_SIZE - 1}
             fill={fillColor}
-            stroke="#333"
+            stroke={cell[0] ? '#444' : '#222'}
             strokeWidth={0.5}
           />
         );
