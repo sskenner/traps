@@ -32,12 +32,12 @@ const MultiplayerGame: React.FC<Props> = ({
     gameOver: false,
     nextPiece: 'I'
   });
-  
+
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [winner, setWinner] = useState<string | null>(null);
-  
+
   const { 
     player, 
     stage, 
@@ -49,11 +49,11 @@ const MultiplayerGame: React.FC<Props> = ({
     resetGame: resetLocalGame,
     addGarbageLines
   } = useTetris();
-  
+
   const { playHit } = useAudio();
-  
+
   const countdownTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Handle sending game updates to opponent
   useEffect(() => {
     if (socket && gameStarted && !gameOver) {
@@ -70,36 +70,36 @@ const MultiplayerGame: React.FC<Props> = ({
           nextPiece
         }
       };
-      
+
       socket.send(JSON.stringify(gameData));
     }
   }, [socket, stage, score, level, rows, gameOver, gameStarted, nextPiece, roomId, username]);
-  
+
   // Handle incoming socket messages
   useEffect(() => {
     if (!socket) return;
-    
+
     const handleSocketMessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);
-        
+
         switch (message.type) {
           case 'game_update':
             // Only update if message is from opponent
             if (message.username !== username) {
               setOpponentData(message.data);
-              
+
               // Check if opponent game over
               if (message.data.gameOver && gameStarted && !gameOver) {
                 handleWin();
               }
             }
             break;
-            
+
           case 'game_start':
             handleGameStart(message.countdown);
             break;
-            
+
           case 'garbage_lines':
             // Only add garbage if message is from opponent
             if (message.username !== username) {
@@ -107,7 +107,7 @@ const MultiplayerGame: React.FC<Props> = ({
               playHit();
             }
             break;
-            
+
           case 'player_left':
             if (gameStarted && !gameOver) {
               handleWin();
@@ -118,51 +118,57 @@ const MultiplayerGame: React.FC<Props> = ({
         console.error('Error parsing socket message:', error);
       }
     };
-    
+
     socket.addEventListener('message', handleSocketMessage);
-    
+
     return () => {
       socket.removeEventListener('message', handleSocketMessage);
     };
   }, [socket, username, gameStarted, gameOver, playHit, addGarbageLines]);
-  
+
   // Handle countdown for game start
   useEffect(() => {
     if (countdown > 0) {
       countdownTimerRef.current = setTimeout(() => {
         setCountdown(countdown - 1);
-        
+
         if (countdown === 1) {
           setGameStarted(true);
           startLocalGame();
         }
       }, 1000);
     }
-    
+
     return () => {
       if (countdownTimerRef.current) {
         clearTimeout(countdownTimerRef.current);
       }
     };
   }, [countdown, startLocalGame]);
-  
+
   // Request to start the game
   const requestGameStart = () => {
     if (socket) {
+      resetLocalGame(); // Reset game state before starting
       socket.send(JSON.stringify({
         type: 'request_start',
-        room: roomId,
-        username
+        room: roomId
       }));
+
+      // Initialize local game state
+      startLocalGame();
+      setGameStarted(true);
+      setGameOver(false);
+      setCountdown(3);
     }
   };
-  
+
   // Handle game start message
   const handleGameStart = (countdownValue: number) => {
     setCountdown(countdownValue);
     resetLocalGame();
   };
-  
+
   // Handle sending garbage lines to opponent
   const handleLinesClear = (lines: number) => {
     if (socket && lines > 0) {
@@ -175,15 +181,15 @@ const MultiplayerGame: React.FC<Props> = ({
         username,
         lines: lines
       }));
-      
+
       console.log(`Sent ${lines} garbage lines to opponent`);
     }
   };
-  
+
   // Handle local game over
   const handleGameOver = () => {
     setGameOver(true);
-    
+
     if (socket) {
       socket.send(JSON.stringify({
         type: 'game_update',
@@ -200,20 +206,20 @@ const MultiplayerGame: React.FC<Props> = ({
       }));
     }
   };
-  
+
   // Handle winning the game
   const handleWin = () => {
     setGameOver(true);
     setWinner(username);
   };
-  
+
   // Reset the game
   const resetGame = () => {
     setGameOver(false);
     setWinner(null);
     requestGameStart();
   };
-  
+
   // Exit the game
   const handleExit = () => {
     if (socket) {
@@ -223,10 +229,10 @@ const MultiplayerGame: React.FC<Props> = ({
         username
       }));
     }
-    
+
     onExit();
   };
-  
+
   return (
     <div className="w-full max-w-6xl mx-auto p-4">
       {/* Game Header */}
@@ -240,7 +246,7 @@ const MultiplayerGame: React.FC<Props> = ({
           </div>
         </CardHeader>
       </Card>
-      
+
       {/* Countdown Overlay */}
       {countdown > 0 && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -249,7 +255,7 @@ const MultiplayerGame: React.FC<Props> = ({
           </div>
         </div>
       )}
-      
+
       {/* Game Container */}
       <div className="flex flex-col md:flex-row gap-4">
         {/* Player's Game */}
@@ -265,10 +271,10 @@ const MultiplayerGame: React.FC<Props> = ({
               />
             </CardContent>
           </Card>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <ScoreBoard score={score} rows={rows} level={level} />
-            
+
             <div className="flex flex-col gap-4">
               <Card>
                 <CardHeader className="p-4">
@@ -278,7 +284,7 @@ const MultiplayerGame: React.FC<Props> = ({
                   <NextPiece nextPiece={nextPiece} />
                 </CardContent>
               </Card>
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <Button 
                   variant="tetris" 
@@ -287,7 +293,7 @@ const MultiplayerGame: React.FC<Props> = ({
                 >
                   {!gameStarted || gameOver ? 'Start Game' : 'Playing'}
                 </Button>
-                
+
                 <Button 
                   variant="outline" 
                   onClick={handleExit}
@@ -298,7 +304,7 @@ const MultiplayerGame: React.FC<Props> = ({
             </div>
           </div>
         </div>
-        
+
         {/* Opponent's Game */}
         <div className="flex-1">
           <Card className="mb-4">
@@ -318,7 +324,7 @@ const MultiplayerGame: React.FC<Props> = ({
               )}
             </CardContent>
           </Card>
-          
+
           {opponent && (
             <div className="grid grid-cols-2 gap-4">
               <ScoreBoard 
@@ -328,7 +334,7 @@ const MultiplayerGame: React.FC<Props> = ({
                 isOpponent={true}
                 username={opponent}
               />
-              
+
               <Card>
                 <CardHeader className="p-2">
                   <CardTitle className="text-lg">Next Piece</CardTitle>
@@ -341,7 +347,7 @@ const MultiplayerGame: React.FC<Props> = ({
           )}
         </div>
       </div>
-      
+
       {/* Game Over Modal */}
       {gameOver && (
         <GameOver
@@ -352,7 +358,7 @@ const MultiplayerGame: React.FC<Props> = ({
           onMainMenu={handleExit}
         />
       )}
-      
+
       {/* Winner Announcement */}
       {winner && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -360,15 +366,15 @@ const MultiplayerGame: React.FC<Props> = ({
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-green-500">WINNER!</CardTitle>
             </CardHeader>
-            
+
             <CardContent className="flex flex-col gap-4 text-center">
               <p className="text-xl font-semibold">{winner} wins the game!</p>
-              
+
               <div className="grid grid-cols-2 gap-3 mt-4">
                 <Button variant="tetris" onClick={resetGame}>
                   Play Again
                 </Button>
-                
+
                 <Button variant="outline" onClick={handleExit}>
                   Exit Game
                 </Button>
