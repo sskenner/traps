@@ -13,6 +13,33 @@ export const checkCollision = (
   stage: any[][],
   { x: moveX, y: moveY, pos = null }: { x: number; y: number; pos?: { x: number; y: number } | null }
 ) => {
+  if (!player?.tetromino) return true;
+  
+  const posX = pos ? pos.x : player.pos.x;
+  const posY = pos ? pos.y : player.pos.y;
+  
+  for (let y = 0; y < player.tetromino.length; y++) {
+    for (let x = 0; x < player.tetromino[y].length; x++) {
+      // Check piece cell
+      if (player.tetromino[y][x] !== 0) {
+        const newX = x + posX + moveX;
+        const newY = y + posY + moveY;
+        
+        // Check movement inside game width bounds
+        if (newX < 0 || newX >= STAGE_WIDTH) return true;
+        
+        // Check movement inside game height bounds
+        if (newY >= STAGE_HEIGHT) return true;
+        
+        // Check collision with existing pieces
+        if (newY >= 0 && stage[newY] && stage[newY][newX] && stage[newY][newX][0] === 2) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
   if (!player || !player.tetromino) return true;
   
   // Use provided position or player's current position

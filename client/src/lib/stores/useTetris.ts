@@ -338,7 +338,7 @@ export const useTetris = () => {
     if (rows >= (level + 1) * 10) {
       setLevel(prev => prev + 1);
       // Increase speed with each level
-      setDropTime(1000 / (level + 2) + 200);
+      setDropTime(Math.max(100, 1000 - (level * 100))); // Speeds up more gradually
     }
   }, [rows, level]);
 

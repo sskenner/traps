@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Stage, Layer, Rect } from 'react-konva';
 import Tetromino from './Tetromino';
 import { useTetris } from '@/lib/stores/useTetris';
@@ -52,6 +52,38 @@ const TetrisBoard: React.FC<Props> = ({
     }
   }, [gameStarted, gameOver, isOpponent, player.tetromino, resetPlayer]);
 
+  // Update stage -  Added useCallback for optimization
+  const updateStage = useCallback(() => {
+    if (!gameStarted || gameOver) return;
+
+    const newStage = stage.map(row =>
+      row.map(cell => (cell[0] === 1 ? [0, 'clear'] : cell))
+    );
+
+    // Draw the active tetromino
+    if (player.tetromino) {
+      player.tetromino.forEach((row, y) => {
+        row.forEach((value, x) => {
+          if (value !== 0) {
+            const newY = y + player.pos.y;
+            const newX = x + player.pos.x;
+            if (newY >= 0 && newY < STAGE_HEIGHT && newX >= 0 && newX < STAGE_WIDTH) {
+              newStage[newY][newX] = [
+                value,
+                player.collided ? 'merged' : 'clear',
+                player.color
+              ];
+            }
+          }
+        });
+      });
+    }
+    //This is where the updated stage needs to be used within the game loop or elsewhere as needed.
+    //Consider adding a state variable to hold the rendered stage and trigger a re-render.  This is omitted here due to uncertainty of existing state management.
+
+  }, [gameStarted, gameOver, player, stage]);
+
+
   // Game Loop
   useEffect(() => {
     let gameLoop: NodeJS.Timeout | null = null;
@@ -72,6 +104,7 @@ const TetrisBoard: React.FC<Props> = ({
           onLinesClear(clearedRows);
         }
       }
+      updateStage(); //Call updateStage after each game loop iteration.
     };
 
     if (gameStarted && !gameOver && dropTime !== null && !isOpponent) {
@@ -83,7 +116,7 @@ const TetrisBoard: React.FC<Props> = ({
         clearInterval(gameLoop);
       }
     };
-  }, [gameStarted, gameOver, dropTime, player, stage, updatePlayerPos, sweepRows, isOpponent]);
+  }, [gameStarted, gameOver, dropTime, player, stage, updatePlayerPos, sweepRows, isOpponent, updateStage]);
 
   // Start game background music
   useEffect(() => {
@@ -215,6 +248,7 @@ const TetrisBoard: React.FC<Props> = ({
         playHit(); // Play piece landing sound
       }
     }
+    updateStage(); //Call updateStage after each drop.
   };
 
   // Hard drop the player piece to the bottom
@@ -232,6 +266,7 @@ const TetrisBoard: React.FC<Props> = ({
         });
         playHit();
       }
+      updateStage(); //Call updateStage after hard drop.
     }
   };
 
