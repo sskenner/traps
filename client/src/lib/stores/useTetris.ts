@@ -222,24 +222,20 @@ export const useTetris = () => {
     }
 
     // Then draw the tetromino
-    if (player.tetromino) {
-      player.tetromino.forEach((row, y) => {
-        row.forEach((value, x) => {
-          if (value !== 0) {
-            const yPos = y + player.pos.y;
-            const xPos = x + player.pos.x;
-            if (yPos >= 0 && yPos < STAGE_HEIGHT && xPos >= 0 && xPos < STAGE_WIDTH) {
-              if (player.collided) {
-                newStage[yPos][xPos] = [2, player.color]; // Landed piece
-              } else {
-                // Only draw active piece if it's not collided
-                newStage[yPos][xPos] = [1, player.color];
-              }
-            }
+    player.tetromino.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value !== 0) {
+          const yPos = y + player.pos.y;
+          const xPos = x + player.pos.x;
+          if (yPos >= 0 && yPos < STAGE_HEIGHT && xPos >= 0 && xPos < STAGE_WIDTH) {
+            newStage[yPos][xPos] = [
+              player.collided ? 2 : 1,
+              player.color
+            ];
           }
-        });
+        }
       });
-    }
+    });
 
     // Then check if we collided
     if (player.collided) {
