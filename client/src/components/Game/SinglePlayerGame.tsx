@@ -49,13 +49,11 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     const drop = () => {
       if (!gameStarted || gameOver) return;
 
-      if (player.tetromino) {
-        dropPlayer();
-        updateStage();
-      }
+      dropPlayer();
+      updateStage();
     };
 
-    if (dropTime !== null && gameStarted && !gameOver) {
+    if (dropTime !== null) {
       dropTimer = setInterval(drop, dropTime);
     }
 
@@ -64,7 +62,7 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
         clearInterval(dropTimer);
       }
     };
-  }, [dropTime, gameStarted, gameOver, dropPlayer, updateStage, player.tetromino]);
+  }, [dropTime, gameStarted, gameOver, dropPlayer, updateStage]);
 
   // Handle key input
   useEffect(() => {

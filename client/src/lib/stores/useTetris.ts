@@ -16,8 +16,8 @@ export const useTetris = () => {
 
   // Player state
   const [player, setPlayer] = useState({
-    pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
-    tetromino: TETROMINOS['O'].shape,
+    pos: { x: STAGE_WIDTH / 2 - 1, y: 0 },
+    tetromino: TETROMINOS[0],
     collided: false,
   });
 
