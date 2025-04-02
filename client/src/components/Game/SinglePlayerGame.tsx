@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import TetrisBoard from './TetrisBoard';
 import ScoreBoard from './ScoreBoard';
@@ -20,7 +21,9 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     gameStarted,
     startGame,
     resetGame,
-    updateStage
+    updateStage,
+    updatePlayerPos,
+    dropPlayer
   } = useTetris();
   
   const [gameOver, setGameOver] = useState(false);
@@ -28,28 +31,21 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
   // Effect to update the game stage and handle piece falling
   useEffect(() => {
     if (gameStarted && !gameOver) {
-      console.log("Game loop is running");
       const dropTime = 1000 - (level * 50); // Decrease interval as level increases
       
       const gameLoop = setInterval(() => {
-        console.log("Moving piece down");
-        updatePlayerPos({ x: 0, y: 1, collided: false });
+        dropPlayer();
         updateStage();
       }, dropTime);
-      
-      // Initial piece drop after game starts
-      updatePlayerPos({ x: 0, y: 1, collided: false });
-      updateStage();
       
       return () => {
         clearInterval(gameLoop);
       };
     }
-  }, [gameStarted, gameOver, level]);
+  }, [gameStarted, gameOver, level, dropPlayer, updateStage]);
   
   // Effect to check for game over
   useEffect(() => {
-    // Check if the player's position is at the top and has collided
     if (player.collided && player.pos.y < 1 && gameStarted) {
       console.log("Game over detected");
       setGameOver(true);
@@ -77,8 +73,6 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     setGameOver(false);
     startGame();
   }, [resetGame, startGame]);
-  
-  console.log("SinglePlayerGame component rendering, gameStarted:", gameStarted);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-black p-4">
