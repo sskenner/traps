@@ -58,6 +58,13 @@ const TetrisBoard: React.FC<Props> = ({
   useEffect(() => {
     let gameLoop: NodeJS.Timeout | null = null;
 
+    // Initialize player if not set
+    useEffect(() => {
+      if (!player.tetromino && gameStarted && !gameOver && !isOpponent) {
+        resetPlayer();
+      }
+    }, [gameStarted, gameOver, isOpponent, player.tetromino, resetPlayer]);
+
     if (gameStarted && !gameOver && dropTime !== null && !isOpponent) {
       gameLoop = setInterval(() => {
         dropPlayer();
