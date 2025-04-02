@@ -84,6 +84,8 @@ const MultiplayerGame: React.FC<Props> = ({
   useEffect(() => {
     if (!socket) return;
 
+    console.log('Setting up WebSocket handlers');
+    
     const handleSocketMessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);

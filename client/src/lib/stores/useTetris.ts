@@ -173,10 +173,18 @@ export const useTetris = () => {
   const updateStage = useCallback(() => {
     if (!gameStarted) return;
 
+    console.log('Updating stage with player:', player);
+
     // First flush the stage
     const newStage = stage.map(row =>
       row.map(cell => (cell[1] === 'clear' ? [0, 'clear'] : cell))
     );
+
+    // Ensure player position is valid
+    if (!player.tetromino || !player.pos) {
+      console.warn('Invalid player state:', player);
+      return;
+    }
 
     // Then draw the tetromino
     player.tetromino.shape.forEach((row, y) => {

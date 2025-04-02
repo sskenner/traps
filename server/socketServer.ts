@@ -61,6 +61,8 @@ class SocketServer {
   }
   
   private handleMessage(ws: WebSocket, data: any) {
+    console.log('Handling WebSocket message:', data.type);
+    
     switch (data.type) {
       case 'list_rooms':
         this.sendRoomsList(ws);
