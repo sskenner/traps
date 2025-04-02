@@ -44,15 +44,12 @@ const TetrisBoard: React.FC<Props> = ({
     movePlayer
   } = useTetris();
 
-  // Initialize game state
+  // Initialize player
   useEffect(() => {
-    if (gameStarted && !isOpponent) {
-      setDropTime(1000);
-      if (!player.tetromino || !player.tetromino.length) {
-        resetPlayer();
-      }
+    if (!player.tetromino && gameStarted && !gameOver && !isOpponent) {
+      resetPlayer();
     }
-  }, [gameStarted, isOpponent, resetPlayer, player.tetromino]);
+  }, [gameStarted, gameOver, isOpponent, player.tetromino, resetPlayer]);
 
   // Game Loop
   useEffect(() => {
