@@ -17,8 +17,9 @@ class SocketServer {
     // Configure WebSocket server with path matching our endpoint
     this.wss = new WebSocketServer({ 
       server,
-      path: '/ws', // This should match the endpoint in routes.ts and client connection URL
-      clientTracking: true // Keep track of connected clients
+      path: '/ws',
+      clientTracking: true,
+      perMessageDeflate: false // Disable per-message deflate to reduce latency
     });
     
     log('WebSocket server created on path: /ws', 'websocket');
