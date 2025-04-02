@@ -22,7 +22,9 @@ class SocketServer {
       perMessageDeflate: false // Disable per-message deflate to reduce latency
     });
     
-    log('WebSocket server created on path: /ws', 'websocket');
+    log(`WebSocket server created and listening on path: /ws`, 'websocket');
+    log(`WebSocket URL in development: ws://0.0.0.0:5000/ws`, 'websocket');
+    log(`WebSocket URL in production: wss://traps2.replit.app/ws`, 'websocket');
     this.setupWebSocketServer();
   }
   

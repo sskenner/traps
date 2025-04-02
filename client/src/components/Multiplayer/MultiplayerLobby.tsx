@@ -29,9 +29,11 @@ const MultiplayerLobby: React.FC<Props> = ({ onBack }) => {
     
     try {
       // Construct WebSocket URL based on current environment
+      const isDev = window.location.hostname === 'localhost' || window.location.hostname.includes('.repl.co');
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.hostname;
-      const wsUrl = `${protocol}//${host}/ws`;
+      const port = isDev ? ':5000' : ''; // Only use port in development
+      const wsUrl = `${protocol}//${host}${port}/ws`;
       console.log('Connecting to WebSocket at:', wsUrl);
       ws = new WebSocket(wsUrl);
       
