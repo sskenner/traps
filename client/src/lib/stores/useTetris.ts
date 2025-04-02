@@ -30,7 +30,7 @@ export const useTetris = () => {
   // Reset player position and get new tetromino
   const resetPlayer = useCallback(() => {
     const tetromino = randomTetromino();
-    const startY = tetromino.shape.length === 4 ? -2 : -1; // Adjust Y based on piece height
+    const startY = tetromino.shape.length === 4 ? -2 : -1;
     const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
 
     // Check if spawn position is blocked
@@ -38,15 +38,16 @@ export const useTetris = () => {
       row.some((cell, x) => {
         const boardY = startY + y;
         if (cell !== 0 && boardY >= 0) {
-          return stage[boardY] && stage[boardY][startX + x] !== 0;
+          return stage[boardY] && stage[boardY][startX + x] && stage[boardY][startX + x][0] === 2;
         }
         return false;
       })
     );
 
     if (isBlocked) {
-      setGameStarted(false); // End the game
-      setGameOver(true); // Set game over
+      setGameStarted(false);
+      setGameOver(true);
+      setDropTime(null);
       return;
     }
 
@@ -332,8 +333,12 @@ export const useTetris = () => {
   useEffect(() => {
     if (rows >= (level + 1) * 10) {
       setLevel(prev => prev + 1);
-      // Increase speed with each level
-      setDropTime(Math.max(100, 1000 - (level * 100))); // Speeds up more gradually
+      // Smoother speed progression
+      const baseSpeed = 1000;
+      const speedFactor = 0.8;
+      const minSpeed = 100;
+      const newSpeed = Math.max(minSpeed, Math.floor(baseSpeed * Math.pow(speedFactor, level)));
+      setDropTime(newSpeed);
     }
   }, [rows, level]);
 

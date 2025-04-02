@@ -259,9 +259,14 @@ const TetrisBoard: React.FC<Props> = ({
         newY++;
       }
       if (newY !== player.pos.y) {
-        updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
+        setPlayer(prev => ({
+          ...prev,
+          pos: { ...prev.pos, y: newY - 1 },
+          collided: true
+        }));
         playHit();
-        resetPlayer();
+        
+        // Force immediate stage update
         const clearedRows = sweepRows();
         if (clearedRows > 0) {
           playSuccess();
@@ -269,6 +274,8 @@ const TetrisBoard: React.FC<Props> = ({
             onLinesClear(clearedRows);
           }
         }
+        resetPlayer();
+        updateStage();
       }
     }
   };
