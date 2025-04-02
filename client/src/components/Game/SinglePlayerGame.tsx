@@ -30,33 +30,16 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
   } = useTetris();
 
   const [gameOver, setGameOver] = useState(false);
-  const [dropTime, setDropTime] = useState<number | null>(null);
-
-  // Handle automatic drops
-  useEffect(() => {
-    if (!gameStarted || gameOver) {
-      setDropTime(null);
-      return;
-    }
-
-    setDropTime(1000 / (level + 1) + 200);
-  }, [level, gameStarted, gameOver]);
-
   // Game Loop
   useEffect(() => {
     let dropTimer: NodeJS.Timeout | null = null;
 
-    const drop = () => {
-      if (!gameStarted || gameOver) return;
-
-      dropPlayer();
-      updateStage();
-    };
-
-    updateStage(); // Initial render of piece
-
-    if (dropTime !== null) {
-      dropTimer = setInterval(drop, dropTime);
+    if (gameStarted && !gameOver) {
+      const dropTime = 1000 / (level + 1) + 200;
+      dropTimer = setInterval(() => {
+        dropPlayer();
+        updateStage();
+      }, dropTime);
     }
 
     return () => {
