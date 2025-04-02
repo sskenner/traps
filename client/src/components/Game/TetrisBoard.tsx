@@ -19,19 +19,19 @@ const TetrisBoard: React.FC<Props> = ({
   onLinesClear 
 }) => {
   console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent });
-  
+
   // Safety check - if we're in single player mode, ensure we don't use any multiplayer props
   if (!isMultiplayer && (gameData || onLinesClear)) {
     console.warn("WebSocket props passed to single player TetrisBoard - ignoring");
   }
-  
+
   const { backgroundMusic, playHit, playSuccess, isMuted } = useAudio();
   const stageRef = useRef<any>(null);
   const CELL_SIZE = isOpponent ? 15 : 30;
-  
+
   const [dropTime, setDropTime] = useState<number | null>(null);
   const [gameOver, setGameOver] = useState(false);
-  
+
   const {
     player,
     stage,
@@ -47,7 +47,7 @@ const TetrisBoard: React.FC<Props> = ({
     startGame,
     sweepRows
   } = useTetris();
-  
+
   // Start game background music
   useEffect(() => {
     // Only attempt to play music if game is started, not opponent view, music exists, and not muted
@@ -58,7 +58,7 @@ const TetrisBoard: React.FC<Props> = ({
           backgroundMusic.play()
             .catch(err => console.log('Audio play prevented:', err));
         }, 100);
-        
+
         return () => {
           clearTimeout(timer);
           if (backgroundMusic) {
@@ -69,43 +69,43 @@ const TetrisBoard: React.FC<Props> = ({
         console.error('Failed to play background music:', error);
       }
     }
-    
+
     return () => {
       if (backgroundMusic) {
         backgroundMusic.pause();
       }
     };
   }, [gameStarted, backgroundMusic, isMuted, isOpponent]);
-  
+
   // Set drop time based on level
   useEffect(() => {
     if (gameStarted && !gameOver) {
       setDropTime(1000 / (level + 1) + 200);
     }
   }, [level, gameStarted, gameOver]);
-  
+
   // Auto drop the tetromino
   useEffect(() => {
     let dropTimer: NodeJS.Timeout | null = null;
-    
+
     if (dropTime && gameStarted && !gameOver && !isOpponent) {
       dropTimer = setInterval(() => {
         drop();
       }, dropTime);
     }
-    
+
     return () => {
       if (dropTimer) clearInterval(dropTimer);
     };
   }, [dropTime, gameStarted, gameOver, isOpponent]);
-  
+
   // Handle keyboard input for player controls
   useEffect(() => {
     if (isOpponent) return; // Don't listen to keys for opponent board
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameStarted || gameOver) return;
-      
+
       switch (e.code) {
         case 'ArrowLeft':
           movePlayer(-1);
@@ -124,33 +124,33 @@ const TetrisBoard: React.FC<Props> = ({
           break;
       }
     };
-    
+
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [gameStarted, gameOver, isOpponent]);
-  
+
   // Move the player left or right
   const movePlayer = (dir: number) => {
     if (!checkCollision(player, stage, { x: dir, y: 0 })) {
       updatePlayerPos({ x: dir, y: 0, collided: false });
     }
   };
-  
+
   // Rotate the player piece
   const rotatePlayerPiece = () => {
     rotatePlayer(stage);
     playHit(); // Play rotation sound
   };
-  
+
   // Drop the player piece one row
   const drop = () => {
     // Increase level when player has cleared 10 rows
     if (rows > (level + 1) * 10) {
       setDropTime(1000 / (level + 2) + 200);
     }
-    
+
     if (!checkCollision(player, stage, { x: 0, y: 1 })) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
     } else {
@@ -166,14 +166,14 @@ const TetrisBoard: React.FC<Props> = ({
         setDropTime(null);
         return;
       }
-      
+
       updatePlayerPos({ x: 0, y: 0, collided: true });
-      
+
       // Check for line clears after collision
       const clearedRows = sweepRows();
       if (clearedRows > 0) {
         playSuccess(); // Play success sound for line clear
-        
+
         // Notify parent about line clears if in multiplayer
         if (isMultiplayer && onLinesClear) {
           console.log(`Cleared ${clearedRows} rows, sending to opponent`);
@@ -184,32 +184,32 @@ const TetrisBoard: React.FC<Props> = ({
       }
     }
   };
-  
+
   // Hard drop the player piece to the bottom
   const hardDrop = () => {
     let newY = player.pos.y;
     const playerCopy = JSON.parse(JSON.stringify(player));
-    
+
     // Find the lowest possible position without collision
     while (!checkCollision(playerCopy, stage, { x: 0, y: 1 })) {
       playerCopy.pos.y += 1;
       newY += 1;
     }
-    
+
     // Move player to that position and mark as collided
     updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
-    
+
     if (!isMuted) {
       playHit(); // Play hard drop sound
     }
-    
+
     // Check for line clears after hard drop
     const clearedRows = sweepRows();
     if (clearedRows > 0) {
       if (!isMuted) {
         playSuccess(); // Play success sound for line clear
       }
-      
+
       // Notify parent about line clears if in multiplayer
       if (isMultiplayer && onLinesClear) {
         console.log(`Hard drop cleared ${clearedRows} rows, sending to opponent`);
@@ -217,7 +217,7 @@ const TetrisBoard: React.FC<Props> = ({
       }
     }
   };
-  
+
   const renderStage = () => {
     return stage.map((row, y) =>
       row.map((cell, x) => {
@@ -236,7 +236,7 @@ const TetrisBoard: React.FC<Props> = ({
       })
     );
   };
-  
+
   return (
     <div className={`tetris-board ${isOpponent ? 'opponent-board' : ''}`}>
       <Stage 
