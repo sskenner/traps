@@ -55,10 +55,26 @@ const TetrisBoard: React.FC<Props> = ({
   useEffect(() => {
     let gameLoop: NodeJS.Timeout | null = null;
 
+    const handleGameLoop = () => {
+      if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+        updatePlayerPos({ x: 0, y: 1, collided: false });
+      } else {
+        // Handle collision
+        if (player.pos.y < 1) {
+          setGameOver(true);
+          setDropTime(null);
+          return;
+        }
+        updatePlayerPos({ x: 0, y: 0, collided: true });
+        const clearedRows = sweepRows();
+        if (clearedRows > 0 && onLinesClear) {
+          onLinesClear(clearedRows);
+        }
+      }
+    };
+
     if (gameStarted && !gameOver && dropTime !== null && !isOpponent) {
-      gameLoop = setInterval(() => {
-        dropPlayer();
-      }, dropTime);
+      gameLoop = setInterval(handleGameLoop, dropTime);
     }
 
     return () => {
@@ -66,7 +82,7 @@ const TetrisBoard: React.FC<Props> = ({
         clearInterval(gameLoop);
       }
     };
-  }, [gameStarted, gameOver, dropTime, dropPlayer, isOpponent]);
+  }, [gameStarted, gameOver, dropTime, player, stage, updatePlayerPos, sweepRows, isOpponent]);
 
   // Start game background music
   useEffect(() => {
@@ -128,13 +144,19 @@ const TetrisBoard: React.FC<Props> = ({
 
       switch (e.code) {
         case 'ArrowLeft':
-          movePlayer(-1);
+          if (!checkCollision(player, stage, { x: -1, y: 0 })) {
+            updatePlayerPos({ x: -1, y: 0, collided: false });
+          }
           break;
         case 'ArrowRight':
-          movePlayer(1);
+          if (!checkCollision(player, stage, { x: 1, y: 0 })) {
+            updatePlayerPos({ x: 1, y: 0, collided: false });
+          }
           break;
         case 'ArrowDown':
-          dropPlayer();
+          if (!checkCollision(player, stage, { x: 0, y: 1 })) {
+            updatePlayerPos({ x: 0, y: 1, collided: false });
+          }
           break;
         case 'ArrowUp':
           rotatePlayerPiece();
