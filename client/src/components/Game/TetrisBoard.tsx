@@ -272,7 +272,15 @@ const TetrisBoard: React.FC<Props> = ({
         <Layer>
           {stage.map((row, y) =>
             row.map((cell, x) => {
-              // Check if we're drawing an active tetromino cell
+              let fillColor = '#111'; // Empty cell color
+              if (cell[0] === 1) {
+                // Active piece
+                fillColor = player.color || '#00f0f0';
+              } else if (cell[0] === 2) {
+                // Settled piece
+                fillColor = cell[1] || '#666';
+              }
+              
               return (
                 <Rect
                   key={`${x}-${y}`}
@@ -280,7 +288,7 @@ const TetrisBoard: React.FC<Props> = ({
                   y={y * CELL_SIZE}
                   width={CELL_SIZE - 1}
                   height={CELL_SIZE - 1}
-                  fill={cell[0] === 0 ? '#111' : cell[0] === 1 ? player.color : cell[1]}
+                  fill={fillColor}
                   stroke="#333"
                   strokeWidth={0.5}
                 />
