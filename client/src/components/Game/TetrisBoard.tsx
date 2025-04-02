@@ -258,12 +258,16 @@ const TetrisBoard: React.FC<Props> = ({
       while (!checkCollision(player, stage, { x: 0, y: 1, pos: { x: player.pos.x, y: newY } })) {
         newY++;
       }
+      
+      // Check if piece is still at the top
+      const finalY = newY - 1;
+      if (finalY <= 0) {
+        setGameOver(true);
+        return;
+      }
+
       if (newY !== player.pos.y) {
-        setPlayer(prev => ({
-          ...prev,
-          pos: { ...prev.pos, y: newY - 1 },
-          collided: true
-        }));
+        updatePlayerPos({ x: 0, y: finalY - player.pos.y, collided: true });
         playHit();
         
         // Force immediate stage update
@@ -274,8 +278,6 @@ const TetrisBoard: React.FC<Props> = ({
             onLinesClear(clearedRows);
           }
         }
-        resetPlayer();
-        updateStage();
       }
     }
   };
