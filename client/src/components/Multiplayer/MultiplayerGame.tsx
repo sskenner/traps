@@ -47,7 +47,12 @@ const MultiplayerGame: React.FC<Props> = ({
     nextPiece,
     startGame: startLocalGame,
     resetGame: resetLocalGame,
-    addGarbageLines
+    addGarbageLines,
+    updateStage,
+    setScore,
+    setLevel,
+    setRows,
+    setNextPiece
   } = useTetris();
 
   const { playHit } = useAudio();
@@ -82,33 +87,56 @@ const MultiplayerGame: React.FC<Props> = ({
     const handleSocketMessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);
+        console.log('Received message:', message);
 
         switch (message.type) {
           case 'game_update':
-            // Only update if message is from opponent
             if (message.username !== username) {
+              console.log('Updating opponent data:', message.data);
               setOpponentData(message.data);
 
-              // Check if opponent game over
               if (message.data.gameOver && gameStarted && !gameOver) {
                 handleWin();
+              }
+            } else {
+              // Update local game state with server state
+              console.log('Updating local game state:', message.data);
+              const { stage, score, level, rows, gameOver: serverGameOver, nextPiece } = message.data;
+              
+              if (stage && stage.length > 0) {
+                updateStage(stage);
+              }
+              
+              // Synchronize game state
+              if (gameStarted && !gameOver) {
+                setScore(score);
+                setLevel(level);
+                setRows(rows);
+                if (serverGameOver) {
+                  setGameOver(true);
+                }
+                if (nextPiece) {
+                  setNextPiece(nextPiece);
+                }
               }
             }
             break;
 
           case 'game_start':
+            console.log('Game starting:', message);
             handleGameStart(message.countdown);
             break;
 
           case 'garbage_lines':
-            // Only add garbage if message is from opponent
             if (message.username !== username) {
+              console.log('Adding garbage lines:', message.lines);
               addGarbageLines(message.lines);
               playHit();
             }
             break;
 
           case 'player_left':
+            console.log('Player left:', message);
             if (gameStarted && !gameOver) {
               handleWin();
             }
@@ -124,7 +152,7 @@ const MultiplayerGame: React.FC<Props> = ({
     return () => {
       socket.removeEventListener('message', handleSocketMessage);
     };
-  }, [socket, username, gameStarted, gameOver, playHit, addGarbageLines]);
+  }, [socket, username, gameStarted, gameOver, playHit, addGarbageLines, updateStage]);
 
   // Handle countdown for game start
   useEffect(() => {

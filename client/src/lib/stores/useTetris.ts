@@ -263,6 +263,10 @@ export const useTetris = () => {
     updateStage,
     sweepRows,
     addGarbageLines,
-    movePlayer
+    movePlayer,
+    setScore,
+    setLevel,
+    setRows,
+    setNextPiece
   };
 };
