@@ -25,19 +25,23 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
   
   const [gameOver, setGameOver] = useState(false);
   
-  // Effect to update the game stage
+  // Effect to update the game stage and handle piece falling
   useEffect(() => {
     if (gameStarted && !gameOver) {
       console.log("Game loop is running");
+      const dropTime = 1000 - (level * 50); // Decrease interval as level increases
+      
       const gameLoop = setInterval(() => {
+        // Move piece down
+        updatePlayerPos({ x: 0, y: 1, collided: false });
         updateStage();
-      }, 100);
+      }, dropTime);
       
       return () => {
         clearInterval(gameLoop);
       };
     }
-  }, [gameStarted, gameOver, updateStage]);
+  }, [gameStarted, gameOver, updateStage, level]);
   
   // Effect to check for game over
   useEffect(() => {

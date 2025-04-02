@@ -90,11 +90,23 @@ export const useTetris = () => {
 
   // Update player position
   const updatePlayerPos = ({ x, y, collided }: { x: number; y: number; collided: boolean }) => {
-    setPlayer(prev => ({
-      ...prev,
-      pos: { x: (prev.pos.x + x), y: (prev.pos.y + y) },
-      collided,
-    }));
+    if (!player.tetromino || !player.pos) return;
+    
+    const newPos = { x: player.pos.x + x, y: player.pos.y + y };
+    const hasCollision = checkCollision(player, stage, { x, y });
+    
+    if (!hasCollision) {
+      setPlayer(prev => ({
+        ...prev,
+        pos: newPos,
+        collided,
+      }));
+    } else if (y > 0) { // Only set collided if moving downward
+      setPlayer(prev => ({
+        ...prev,
+        collided: true,
+      }));
+    }
   };
 
   // Rotate tetromino
