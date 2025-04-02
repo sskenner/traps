@@ -154,12 +154,7 @@ const TetrisBoard: React.FC<Props> = ({
     };
   }, [gameStarted, gameOver, isOpponent]);
 
-  // Move the player left or right
-  const movePlayer = (dir: number) => {
-    if (!checkCollision(player, stage, { x: dir, y: 0 })) {
-      updatePlayerPos({ x: dir, y: 0, collided: false });
-    }
-  };
+  // Movement is handled by the movePlayer function from useTetris hook
 
   // Rotate the player piece
   const rotatePlayerPiece = () => {
