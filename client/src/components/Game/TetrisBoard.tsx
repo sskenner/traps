@@ -261,7 +261,7 @@ const TetrisBoard: React.FC<Props> = ({
       >
         <Layer>
           {renderStage()}
-          {gameStarted && player.tetromino && !isOpponent && (
+          {gameStarted && player && player.tetromino && !isOpponent && (
             <Tetromino 
               tetromino={player.tetromino}
               position={player.pos}
