@@ -16,8 +16,8 @@ export const useTetris = () => {
 
   // Player state
   const [player, setPlayer] = useState({
-    pos: { x: STAGE_WIDTH / 2 - 1, y: 0 },
-    tetromino: TETROMINOS[0],
+    pos: { x: STAGE_WIDTH / 2 - 2, y: 0 },
+    tetromino: TETROMINOS['I'].shape,
     collided: false,
   });
 
@@ -207,12 +207,15 @@ export const useTetris = () => {
   const updateStage = useCallback(() => {
     if (!gameStarted) return;
 
-    console.log('Updating stage with player:', player);
-
     // First flush the stage
     const newStage = stage.map(row =>
       row.map(cell => (cell[1] === 'clear' ? [0, 'clear'] : cell))
     );
+
+    if (!player.tetromino) {
+      resetPlayer();
+      return;
+    }
 
     // Ensure player position is valid
     if (!player.tetromino || !player.pos) {

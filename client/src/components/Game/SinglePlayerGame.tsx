@@ -53,6 +53,8 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
       updateStage();
     };
 
+    updateStage(); // Initial render of piece
+
     if (dropTime !== null) {
       dropTimer = setInterval(drop, dropTime);
     }
