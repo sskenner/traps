@@ -155,7 +155,22 @@ export const useTetris = () => {
 
   // Drop player one row
   const dropPlayer = () => {
-    updatePlayerPos({ x: 0, y: 1, collided: false });
+    if (!gameStarted || !player.tetromino) return;
+    
+    const collision = checkCollision(player, stage, { x: 0, y: 1 });
+    if (!collision) {
+      updatePlayerPos({ x: 0, y: 1, collided: false });
+    } else {
+      // Has collided
+      if (player.pos.y < 1) {
+        // Game Over
+        setGameStarted(false);
+        return;
+      }
+      updatePlayerPos({ x: 0, y: 0, collided: true });
+      // Generate new piece
+      resetPlayer();
+    }
   };
 
   // Add garbage lines from opponent
@@ -228,13 +243,23 @@ export const useTetris = () => {
 
   // Start the game
   const startGame = () => {
+    console.log("Starting game...");
     // Reset everything
     setStage(createStage());
     setScore(0);
     setRows(0);
     setLevel(0);
-    resetPlayer();
     setGameStarted(true);
+    
+    // Initialize first piece
+    const tetromino = randomTetromino();
+    const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
+    setPlayer({
+      pos: { x: startX, y: 0 },
+      tetromino: tetromino.shape,
+      collided: false
+    });
+    setNextPiece(tetromino.type);
   };
 
   // Reset the game

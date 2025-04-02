@@ -20,16 +20,11 @@ const TetrisBoard: React.FC<Props> = ({
 }) => {
   console.log("Rendering TetrisBoard:", { isMultiplayer, isOpponent });
 
-  // Safety check - if we're in single player mode, ensure we don't use any multiplayer props
-  if (!isMultiplayer && (gameData || onLinesClear)) {
-    console.warn("WebSocket props passed to single player TetrisBoard - ignoring");
-  }
-
   const { backgroundMusic, playHit, playSuccess, isMuted } = useAudio();
   const stageRef = useRef<any>(null);
   const CELL_SIZE = isOpponent ? 15 : 30;
-
-  const [dropTime, setDropTime] = useState<number | null>(null);
+  const dropTimeRef = useRef<number>(1000);
+  const [dropTime, setDropTime] = useState<number | null>(1000);
   const [gameOver, setGameOver] = useState(false);
 
   const {
@@ -45,8 +40,36 @@ const TetrisBoard: React.FC<Props> = ({
     resetGame,
     gameStarted,
     startGame,
-    sweepRows
+    sweepRows,
+    movePlayer
   } = useTetris();
+
+  // Initialize game state
+  useEffect(() => {
+    if (gameStarted && !isOpponent) {
+      setDropTime(1000);
+      if (!player.tetromino || !player.tetromino.length) {
+        resetPlayer();
+      }
+    }
+  }, [gameStarted, isOpponent, resetPlayer, player.tetromino]);
+
+  // Game Loop
+  useEffect(() => {
+    let gameLoop: NodeJS.Timeout | null = null;
+
+    if (gameStarted && !gameOver && dropTime !== null && !isOpponent) {
+      gameLoop = setInterval(() => {
+        dropPlayer();
+      }, dropTime);
+    }
+
+    return () => {
+      if (gameLoop) {
+        clearInterval(gameLoop);
+      }
+    };
+  }, [gameStarted, gameOver, dropTime, dropPlayer, isOpponent]);
 
   // Start game background music
   useEffect(() => {
