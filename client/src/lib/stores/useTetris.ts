@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { TETROMINOS, randomTetromino, TetrominoType } from '../tetrominos';
 import { STAGE_WIDTH, STAGE_HEIGHT, createStage, checkCollision } from '../gameHelpers';
 
@@ -10,6 +10,8 @@ export const useTetris = () => {
   const [score, setScore] = useState(0);
   const [rows, setRows] = useState(0);
   const [level, setLevel] = useState(0);
+  const [gameOver, setGameOver] = useState(false); // Added game over state
+  const [dropTime, setDropTime] = useState(null); //Added dropTime state
 
   // Game state
   const [gameStarted, setGameStarted] = useState(false);
@@ -44,6 +46,7 @@ export const useTetris = () => {
 
     if (isBlocked) {
       setGameStarted(false); // End the game
+      setGameOver(true); // Set game over
       return;
     }
 
@@ -95,10 +98,10 @@ export const useTetris = () => {
       console.warn('Invalid player state during position update');
       return;
     }
-    
+
     const newPos = { x: player.pos.x + x, y: player.pos.y + y };
     const hasCollision = checkCollision(player, stage, { x, y });
-    
+
     if (!hasCollision) {
       console.log('Moving piece to:', newPos);
       setPlayer(prev => ({
@@ -131,33 +134,47 @@ export const useTetris = () => {
 
   // Rotate player tetromino
   const rotatePlayer = (stage: any[][]) => {
+    if (!gameStarted || gameOver) return;
+
     const clonedPlayer = JSON.parse(JSON.stringify(player));
-    clonedPlayer.tetromino.shape = rotate(clonedPlayer.tetromino.shape, 1);
 
-    // Check for collisions when rotating
-    const pos = clonedPlayer.pos.x;
-    let offset = 1;
+    // Rotate matrix
+    const matrix = clonedPlayer.tetromino;
+    const rotated = matrix[0].map((_, i) =>
+      matrix.map(row => row[i]).reverse()
+    );
 
-    // Adjust position if tetromino is outside the stage boundary after rotation
-    while (checkCollision(clonedPlayer, stage, { x: 0, y: 0 })) {
-      clonedPlayer.pos.x += offset;
-      offset = -(offset + (offset > 0 ? 1 : -1));
+    // Wall kick offsets to try
+    const kicks = [
+      { x: 0, y: 0 },   // Original position
+      { x: -1, y: 0 },  // Left
+      { x: 1, y: 0 },   // Right
+      { x: 0, y: -1 },  // Up
+      { x: 0, y: 1 },   // Down
+    ];
 
-      // If offset gets too big, rotation is not possible at current position
-      if (offset > clonedPlayer.tetromino.shape[0].length) {
-        rotate(clonedPlayer.tetromino.shape, -1); // Rotate back
-        clonedPlayer.pos.x = pos;
+    // Try each offset until we find a valid position
+    for (const kick of kicks) {
+      const testPos = {
+        x: clonedPlayer.pos.x + kick.x,
+        y: clonedPlayer.pos.y + kick.y
+      };
+
+      if (!checkCollision({ ...clonedPlayer, tetromino: rotated }, stage, { x: 0, y: 0, pos: testPos })) {
+        setPlayer({
+          ...player,
+          tetromino: rotated,
+          pos: testPos
+        });
         return;
       }
     }
-
-    setPlayer(clonedPlayer);
   };
 
   // Drop player one row
   const dropPlayer = () => {
-    if (!gameStarted || !player.tetromino) return;
-    
+    if (!gameStarted || gameOver) return;
+
     const collision = checkCollision(player, stage, { x: 0, y: 1 });
     if (!collision) {
       updatePlayerPos({ x: 0, y: 1, collided: false });
@@ -166,6 +183,7 @@ export const useTetris = () => {
       if (player.pos.y < 1) {
         // Game Over
         setGameStarted(false);
+        setGameOver(true);
         return;
       }
       updatePlayerPos({ x: 0, y: 0, collided: true });
@@ -206,7 +224,7 @@ export const useTetris = () => {
 
   // Update stage
   const updateStage = useCallback(() => {
-    if (!gameStarted) return;
+    if (!gameStarted || gameOver) return;
 
     console.log('Updating stage with player:', player);
 
@@ -244,7 +262,7 @@ export const useTetris = () => {
     }
 
     setStage(newStage);
-  }, [stage, player, resetPlayer, sweepRows, gameStarted]);
+  }, [stage, player, resetPlayer, sweepRows, gameStarted, gameOver]);
 
   // Start the game
   const startGame = () => {
@@ -255,26 +273,28 @@ export const useTetris = () => {
     setRows(0);
     setLevel(0);
     setGameStarted(true);
-    
+    setGameOver(false); // Reset game over state
+    setDropTime(1000); // Set initial drop time
+
     // Initialize first piece
     const firstType = randomTetromino();
     const firstPiece = TETROMINOS[firstType];
     const startX = STAGE_WIDTH / 2 - Math.floor(firstPiece.shape[0].length / 2);
-    
+
     setPlayer({
       pos: { x: startX, y: 0 },
       tetromino: firstPiece.shape,
       color: firstPiece.color,
       collided: false
     });
-    
+
     // Generate and set next piece
     const nextType = randomTetromino();
     setNextPiece(nextType);
-    
+
     // Force immediate stage update
     setStage(createStage());
-    
+
     // Force stage update after a brief delay to ensure state is updated
     setTimeout(() => {
       updateStage();
@@ -288,6 +308,7 @@ export const useTetris = () => {
     setRows(0);
     setLevel(0);
     setGameStarted(false);
+    setGameOver(false); // Reset game over state
     setPlayer({
       pos: { x: 0, y: 0 },
       tetromino: TETROMINOS[0],
@@ -297,15 +318,33 @@ export const useTetris = () => {
   };
 
   // Update game state
-  useCallback(() => {
-    if (gameStarted) {
-      updateStage();
+  useEffect(() => {
+    if (gameStarted && !gameOver) {
+      let dropCount = 0;
+      const intervalId = setInterval(() => {
+          dropCount++;
+          if (dropCount >= (dropTime / 1000)) {
+              dropPlayer();
+              dropCount = 0;
+          }
+      }, 10);
+
+      return () => clearInterval(intervalId);
+  }
+  }, [gameStarted, gameOver, dropPlayer, dropTime]);
+
+
+  useEffect(() => {
+    if (rows >= (level + 1) * 10) {
+      setLevel(prev => prev + 1);
+      // Increase speed with each level
+      setDropTime(1000 / (level + 2) + 200);
     }
-  }, [gameStarted, updateStage]);
+  }, [rows, level]);
 
   const movePlayer = (dir: number) => {
-    if (!player.tetromino || !gameStarted) return;
-    
+    if (!player.tetromino || !gameStarted || gameOver) return;
+
     const collision = checkCollision(player, stage, { x: dir, y: 0 });
     if (!collision) {
       setPlayer(prev => ({
@@ -338,6 +377,8 @@ export const useTetris = () => {
     setScore,
     setLevel,
     setRows,
-    setNextPiece
+    setNextPiece,
+    gameOver,
+    setGameOver //Added gameOver setter
   };
 };

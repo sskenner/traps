@@ -41,7 +41,8 @@ const TetrisBoard: React.FC<Props> = ({
     gameStarted,
     startGame,
     sweepRows,
-    movePlayer
+    movePlayer,
+    setPlayer
   } = useTetris();
 
   // Initialize player
@@ -218,33 +219,18 @@ const TetrisBoard: React.FC<Props> = ({
 
   // Hard drop the player piece to the bottom
   const hardDrop = () => {
-    let newY = player.pos.y;
-    const playerCopy = JSON.parse(JSON.stringify(player));
-
-    // Find the lowest possible position without collision
-    while (!checkCollision(playerCopy, stage, { x: 0, y: 1 })) {
-      playerCopy.pos.y += 1;
-      newY += 1;
-    }
-
-    // Move player to that position and mark as collided
-    updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
-
-    if (!isMuted) {
-      playHit(); // Play hard drop sound
-    }
-
-    // Check for line clears after hard drop
-    const clearedRows = sweepRows();
-    if (clearedRows > 0) {
-      if (!isMuted) {
-        playSuccess(); // Play success sound for line clear
+    if (!isOpponent && gameStarted && !gameOver) {
+      let newY = player.pos.y;
+      while (!checkCollision(player, stage, { x: 0, y: 1, pos: { x: player.pos.x, y: newY } })) {
+        newY++;
       }
-
-      // Notify parent about line clears if in multiplayer
-      if (isMultiplayer && onLinesClear) {
-        console.log(`Hard drop cleared ${clearedRows} rows, sending to opponent`);
-        onLinesClear(clearedRows);
+      if (newY !== player.pos.y) {
+        setPlayer({
+          ...player,
+          pos: { x: player.pos.x, y: newY },
+          collided: true
+        });
+        playHit();
       }
     }
   };
