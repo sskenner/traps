@@ -261,12 +261,14 @@ const TetrisBoard: React.FC<Props> = ({
       >
         <Layer>
           {renderStage()}
-          {gameStarted && player?.tetromino && Array.isArray(player.tetromino) && !isOpponent && (
+          {gameStarted && !isOpponent && (
             <Tetromino 
-              tetromino={player.tetromino}
-              position={player.pos}
+              tetromino={{
+                shape: Array.isArray(player?.tetromino) ? player.tetromino : [[0]],
+                color: player?.color || '#00f0f0'
+              }}
+              position={player?.pos || { x: 0, y: 0 }}
               cellSize={CELL_SIZE}
-              color={player.color || '#00f0f0'}
             />
           )}
         </Layer>
