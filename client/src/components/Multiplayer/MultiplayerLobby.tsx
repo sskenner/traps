@@ -28,8 +28,11 @@ const MultiplayerLobby: React.FC<Props> = ({ onBack }) => {
     let ws: WebSocket;
     
     try {
-      // Force WebSocket URL to use production settings
-      const wsUrl = 'wss://traps2.replit.app/ws';
+      // Construct WebSocket URL based on environment
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.hostname;
+      const port = window.location.hostname === 'localhost' ? ':5000' : '';
+      const wsUrl = `${protocol}//${host}${port}/ws`;
       console.log('Connecting to WebSocket at:', wsUrl);
       ws = new WebSocket(wsUrl);
       

@@ -19,8 +19,7 @@ class SocketServer {
       server,
       path: '/ws',
       clientTracking: true,
-      perMessageDeflate: false, // Disable per-message deflate to reduce latency
-      handleProtocols: () => 'wss' // Force WSS protocol
+      perMessageDeflate: false // Disable per-message deflate to reduce latency
     });
     
     log(`WebSocket server created and listening on path: /ws`, 'websocket');
