@@ -1,0 +1,25 @@
+The React application is failing to connect to the WebSocket server in multiplayer mode. The client, running on `https://traps2.replit.app/`, is attempting to connect to `wss://traps2.replit.app/ws`, but this connection is failing. The server-side code is configured to run the WebSocket server using the insecure `ws` protocol on port 5000.
+
+**Action:** The primary goal is to establish a successful WebSocket connection by ensuring the client and server are configured to communicate using compatible protocols and addresses, considering Replit's deployment environment.
+
+1.  **Client-Side WebSocket URL Construction in `client/src/components/Multiplayer/MultiplayerLobby.tsx`:**
+    * The current logic likely constructs a `wss://` URL because the page is served over HTTPS. This needs to be overridden to match the server's `ws://` configuration.
+    * **Modify the `MultiplayerLobby.tsx` component to explicitly connect to the WebSocket server using `ws://traps2.replit.app:5000`.** Force the use of `ws` and explicitly include the port `5000`. The path `/ws` might need to be appended depending on the server's route handling. Try `ws://traps2.replit.app:5000` initially, and if that fails, try `ws://traps2.replit.app:5000/ws`.
+
+2.  **Replit WebSocket Handling (Important Consideration):**
+    * While forcing `ws` on the client might establish a connection, it's crucial to understand if Replit's infrastructure requires secure `wss` connections for WebSocket traffic when the application is served over HTTPS.
+    * **Investigate the following:**
+        * Does Replit automatically handle SSL termination for WebSocket connections? If so, the server might need to be configured for `wss`.
+        * If `wss` is required by Replit, the server-side code in `server/src/server.ts` will need to be updated to use `wss` and handle SSL certificates. This might involve using modules like `ws` with secure context options.
+
+3.  **Debugging and Logging:**
+    * Add `console.log` statements in `MultiplayerLobby.tsx` to log the exact `wsURL` being constructed before attempting the connection.
+    * Use the browser's Network tab (WS filter) to observe the WebSocket connection attempts and any error messages. Pay close attention to the URL being attempted and the error details.
+
+**Steps to Take:**
+
+1.  **Modify `MultiplayerLobby.tsx` to use `ws://traps2.replit.app:5000` (or `/ws` appended).**
+2.  **Test if the connection succeeds.**
+3.  **If the connection still fails, investigate Replit's `wss` requirements.** This might involve researching Replit documentation or experimenting with server-side `wss` configuration if Replit handles SSL termination for WebSockets.
+
+The immediate goal is to establish a successful WebSocket connection. Addressing the protocol mismatch is the most likely solution based on the current information. Understanding Replit's `wss` requirements is crucial for a robust, production-ready solution.
