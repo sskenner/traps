@@ -266,7 +266,7 @@ const TetrisBoard: React.FC<Props> = ({
               tetromino={player.tetromino}
               position={player.pos}
               cellSize={CELL_SIZE}
-              color={TETROMINOS[nextPiece].color}
+              color={player.color || '#00f0f0'}
             />
           )}
         </Layer>
