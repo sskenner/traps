@@ -17,7 +17,7 @@ export const useTetris = () => {
   // Player state
   const [player, setPlayer] = useState({
     pos: { x: STAGE_WIDTH / 2 - 1, y: 0 },
-    tetromino: TETROMINOS['I'].shape,
+    tetromino: TETROMINOS['I'],
     collided: false,
   });
 
@@ -94,10 +94,10 @@ export const useTetris = () => {
       console.warn('Invalid player state during position update');
       return;
     }
-
+    
     const newPos = { x: player.pos.x + x, y: player.pos.y + y };
     const hasCollision = checkCollision(player, stage, { x, y });
-
+    
     if (!hasCollision) {
       console.log('Moving piece to:', newPos);
       setPlayer(prev => ({
@@ -206,7 +206,7 @@ export const useTetris = () => {
     }
 
     // Then draw the tetromino
-    player.tetromino.forEach((row, y) => {
+    player.tetromino.shape.forEach((row, y) => {
       row.forEach((value, x) => {
         if (value !== 0) {
           newStage[y + player.pos.y][x + player.pos.x] = [
@@ -246,7 +246,7 @@ export const useTetris = () => {
     setGameStarted(false);
     setPlayer({
       pos: { x: 0, y: 0 },
-      tetromino: TETROMINOS['I'].shape,
+      tetromino: TETROMINOS[0],
       collided: false,
     });
     setNextPiece('I');
