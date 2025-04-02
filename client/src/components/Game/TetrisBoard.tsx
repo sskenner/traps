@@ -236,13 +236,10 @@ const TetrisBoard: React.FC<Props> = ({
   const renderStage = () => {
     return stage.map((row, y) =>
       row.map((cell, x) => {
-        // Get the appropriate fill color based on cell type
-        let fillColor = '#111'; // Empty cell
-        if (cell[0] === 1) {
-          // Active piece
+        let fillColor = '#111';
+        if (cell[0] === 1 && player.tetromino) {
           fillColor = player.color || '#00f0f0';
         } else if (cell[0] === 2) {
-          // Settled piece
           fillColor = cell[1] || '#666';
         }
 
@@ -270,31 +267,7 @@ const TetrisBoard: React.FC<Props> = ({
         ref={stageRef}
       >
         <Layer>
-          {stage.map((row, y) =>
-            row.map((cell, x) => {
-              let fillColor = '#111'; // Empty cell color
-              if (cell[0] === 1) {
-                // Active piece
-                fillColor = player.color || '#00f0f0';
-              } else if (cell[0] === 2) {
-                // Settled piece
-                fillColor = cell[1] || '#666';
-              }
-              
-              return (
-                <Rect
-                  key={`${x}-${y}`}
-                  x={x * CELL_SIZE}
-                  y={y * CELL_SIZE}
-                  width={CELL_SIZE - 1}
-                  height={CELL_SIZE - 1}
-                  fill={fillColor}
-                  stroke="#333"
-                  strokeWidth={0.5}
-                />
-              );
-            })
-          )}
+          {renderStage()}
         </Layer>
       </Stage>
     </div>
