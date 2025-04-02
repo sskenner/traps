@@ -319,18 +319,13 @@ export const useTetris = () => {
 
   // Update game state
   useEffect(() => {
-    if (gameStarted && !gameOver) {
-      let dropCount = 0;
+    if (gameStarted && !gameOver && dropTime !== null) {
       const intervalId = setInterval(() => {
-          dropCount++;
-          if (dropCount >= (dropTime / 1000)) {
-              dropPlayer();
-              dropCount = 0;
-          }
-      }, 10);
+        dropPlayer();
+      }, dropTime);
 
       return () => clearInterval(intervalId);
-  }
+    }
   }, [gameStarted, gameOver, dropPlayer, dropTime]);
 
 

@@ -259,14 +259,17 @@ const TetrisBoard: React.FC<Props> = ({
         newY++;
       }
       if (newY !== player.pos.y) {
-        setPlayer({
-          ...player,
-          pos: { x: player.pos.x, y: newY },
-          collided: true
-        });
+        updatePlayerPos({ x: 0, y: newY - player.pos.y, collided: true });
         playHit();
+        resetPlayer();
+        const clearedRows = sweepRows();
+        if (clearedRows > 0) {
+          playSuccess();
+          if (isMultiplayer && onLinesClear) {
+            onLinesClear(clearedRows);
+          }
+        }
       }
-      updateStage(); //Call updateStage after hard drop.
     }
   };
 
