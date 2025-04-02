@@ -252,14 +252,14 @@ export const useTetris = () => {
     setGameStarted(true);
     
     // Initialize first piece
-    const tetromino = randomTetromino();
-    const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
+    const firstPiece = TETROMINOS[randomTetromino()];
+    const startX = STAGE_WIDTH / 2 - Math.floor(firstPiece.shape[0].length / 2);
     setPlayer({
       pos: { x: startX, y: 0 },
-      tetromino: tetromino.shape,
+      tetromino: firstPiece.shape,
       collided: false
     });
-    setNextPiece(tetromino.type);
+    setNextPiece(randomTetromino());
   };
 
   // Reset the game
