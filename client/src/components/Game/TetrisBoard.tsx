@@ -260,38 +260,21 @@ const TetrisBoard: React.FC<Props> = ({
         ref={stageRef}
       >
         <Layer>
-        {stage.map((row, y) =>
-          row.map((cell, x) => (
-            <Rect
-              key={`${x}-${y}`}
-              x={x * CELL_SIZE}
-              y={y * CELL_SIZE}
-              width={CELL_SIZE - 1}
-              height={CELL_SIZE - 1}
-              fill={cell[0] ? cell[1] : '#111'}
-              stroke="#333"
-              strokeWidth={0.5}
-            />
-          ))
-        )}
-        {gameStarted && !isOpponent && player.tetromino && (
-          player.tetromino.map((row, y) =>
-            row.map((cell, x) => 
-              cell !== 0 && (
-                <Rect
-                  key={`player-${x}-${y}`}
-                  x={(player.pos.x + x) * CELL_SIZE}
-                  y={(player.pos.y + y) * CELL_SIZE}
-                  width={CELL_SIZE - 1}
-                  height={CELL_SIZE - 1}
-                  fill={player.color || '#00f0f0'}
-                  stroke="#333"
-                  strokeWidth={0.5}
-                />
-              )
+          {stage.map((row, y) =>
+            row.map((cell, x) => (
+              <Rect
+                key={`${x}-${y}`}
+                x={x * CELL_SIZE}
+                y={y * CELL_SIZE}
+                width={CELL_SIZE - 1}
+                height={CELL_SIZE - 1}
+                fill={cell[0] === 0 ? '#111' : cell[0] === 1 ? (player.tetromino ? player.color : '#00f0f0') : cell[1]}
+                stroke="#333"
+                strokeWidth={0.5}
+              />
             ))
-        )}
-      </Layer>
+          )}
+        </Layer>
       </Stage>
     </div>
   );
