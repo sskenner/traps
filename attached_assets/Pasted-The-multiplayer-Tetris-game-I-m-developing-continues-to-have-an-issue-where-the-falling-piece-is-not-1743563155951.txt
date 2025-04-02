@@ -1,0 +1,39 @@
+The multiplayer Tetris game I'm developing continues to have an issue where the falling piece is not moving at the start of the game. Only one piece is visible on the board, but it remains static.
+
+The console consistently shows the following recurring error:
+
+`TypeError: Cannot read properties of undefined (reading 'length')`
+
+This error originates within the `TetrisBoard` component, specifically in the `index-CnMvfWfx.js` file, around line 67.
+
+The codebase is available at: https://github.com/sskenner/traps
+
+Previous attempts to resolve this issue by modifying `SinglePlayerGame.tsx` and `useTetris.ts` have been unsuccessful. Therefore, we need to re-evaluate the problem, focusing on the data flow to the `TetrisBoard` component and its rendering logic, as well as the game loop and state update mechanisms.
+
+Here's a breakdown of the areas that require investigation:
+
+1.  **Data Flow to `TetrisBoard`:**
+    * Examine the `SinglePlayerGame.tsx` (or the component that renders `TetrisBoard`) and identify how the game state, specifically the data related to the active piece (position, shape, and the board itself), is being passed as props to the `TetrisBoard` component.
+    * Ensure that this data is being correctly initialized and updated in the parent component.
+    * Verify that the props being passed to `TetrisBoard` are not undefined or missing crucial information at any point.
+
+2.  **Rendering Logic in `TetrisBoard` and `index-CnMvfWfx.js`:**
+    * Focus on the code within the `TetrisBoard` component, particularly around line 67 of `index-CnMvfWfx.js`. Analyze what data is being accessed there and why it might be undefined, leading to the `TypeError`.
+    * Ensure that the rendering logic has appropriate checks for undefined or null values before attempting to access properties like `length`.
+    * Verify that the logic correctly iterates over the board data and the active piece's shape and position to render it on the canvas.
+
+3.  **Game Loop and State Update in `useTetris.ts` (Revisited):**
+    * Review the game loop implementation in `useTetris.ts` (or wherever the game logic resides). Ensure it's correctly started when the game begins.
+    * Analyze the function responsible for updating the active piece's position. Confirm that it's being called by the game loop at the correct interval.
+    * Verify that the state updates within `useTetris.ts` are correctly modifying the active piece's position and that these updates are triggering re-renders of the `TetrisBoard` component.
+
+4.  **Initial Piece Generation and Placement:**
+    * Confirm that a new piece is being generated and set as the active piece at the beginning of the game.
+    * Ensure that the initial position of the piece is set to a valid location on the board and that this initial position is correctly reflected in the game state.
+
+5.  **Collision Detection (Potential Early Interference):**
+    * Re-examine the collision detection logic, especially if it was modified in the previous attempt. Ensure it's not prematurely preventing the initial downward movement of the piece.
+
+Please provide specific code snippets from `SinglePlayerGame.tsx`, `TetrisBoard.tsx`, `index-CnMvfWfx.js` (around line 67), and `useTetris.ts` that are relevant to these areas. Explain the likely cause of the `TypeError` and why the piece is not falling. Suggest precise code modifications to resolve these issues and ensure the Tetris game functions as expected, with the initial piece falling automatically.
+
+It's crucial to address the root cause of the `TypeError` as it's likely the key to solving the static piece problem.
