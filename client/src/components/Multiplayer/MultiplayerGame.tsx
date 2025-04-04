@@ -197,6 +197,10 @@ const MultiplayerGame: React.FC<Props> = ({
   const handleGameStart = (countdownValue: number) => {
     setCountdown(countdownValue);
     resetLocalGame();
+    // Ensure player state is properly initialized before starting
+    if (!player.tetromino) {
+      startLocalGame();
+    }
   };
 
   // Handle sending garbage lines to opponent

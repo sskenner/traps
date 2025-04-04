@@ -251,15 +251,24 @@ export const useTetris = () => {
     setLevel(0);
     setGameStarted(true);
     
-    // Initialize first piece
-    const tetromino = randomTetromino();
-    const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
-    setPlayer({
-      pos: { x: startX, y: 0 },
-      tetromino: tetromino.shape,
-      collided: false
-    });
-    setNextPiece(tetromino.type);
+    // Initialize first piece with safety checks
+    try {
+      const tetromino = randomTetromino();
+      if (!tetromino || !tetromino.shape) {
+        console.error('Failed to generate tetromino');
+        return;
+      }
+      const startX = STAGE_WIDTH / 2 - Math.floor(tetromino.shape[0].length / 2);
+      setPlayer({
+        pos: { x: startX, y: 0 },
+        tetromino: tetromino.shape,
+        collided: false
+      });
+      setNextPiece(tetromino.type);
+    } catch (error) {
+      console.error('Error initializing game:', error);
+      setGameStarted(false);
+    }
   };
 
   // Reset the game
