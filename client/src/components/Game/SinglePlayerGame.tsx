@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import TetrisBoard from './TetrisBoard';
 import ScoreBoard from './ScoreBoard';
@@ -21,68 +20,36 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     gameStarted,
     startGame,
     resetGame,
-    updateStage,
-    dropPlayer,
-    movePlayer,
-    rotatePlayer,
-    stage
+    updateStage
   } = useTetris();
   
   const [gameOver, setGameOver] = useState(false);
   
-  // Game Loop
+  // Effect to update the game stage and handle piece falling
   useEffect(() => {
-    let dropTimer: NodeJS.Timeout | null = null;
-
     if (gameStarted && !gameOver) {
-      const dropTime = 1000 / (level + 1) + 200;
-      dropTimer = setInterval(() => {
-        dropPlayer();
+      console.log("Game loop is running");
+      const dropTime = 1000 - (level * 50); // Decrease interval as level increases
+      
+      const gameLoop = setInterval(() => {
+        console.log("Moving piece down");
+        updatePlayerPos({ x: 0, y: 1, collided: false });
         updateStage();
       }, dropTime);
+      
+      // Initial piece drop after game starts
+      updatePlayerPos({ x: 0, y: 1, collided: false });
+      updateStage();
+      
+      return () => {
+        clearInterval(gameLoop);
+      };
     }
-
-    return () => {
-      if (dropTimer) {
-        clearInterval(dropTimer);
-      }
-    };
-  }, [gameStarted, gameOver, level, dropPlayer, updateStage]);
-
-  // Handle keyboard controls
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!gameStarted || gameOver) return;
-
-      switch (event.code) {
-        case 'ArrowLeft':
-          movePlayer(-1);
-          break;
-        case 'ArrowRight':
-          movePlayer(1);
-          break;
-        case 'ArrowDown':
-          dropPlayer();
-          break;
-        case 'ArrowUp':
-          rotatePlayer(stage);
-          break;
-        case 'Space':
-          // Hard drop implementation would go here
-          break;
-        default:
-          break;
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [gameStarted, gameOver, movePlayer, dropPlayer, rotatePlayer, stage]);
+  }, [gameStarted, gameOver, level]);
   
-  // Check for game over
+  // Effect to check for game over
   useEffect(() => {
+    // Check if the player's position is at the top and has collided
     if (player.collided && player.pos.y < 1 && gameStarted) {
       console.log("Game over detected");
       setGameOver(true);
@@ -110,6 +77,8 @@ const SinglePlayerGame: React.FC<Props> = ({ onMainMenu }) => {
     setGameOver(false);
     startGame();
   }, [resetGame, startGame]);
+  
+  console.log("SinglePlayerGame component rendering, gameStarted:", gameStarted);
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-900 to-black p-4">
