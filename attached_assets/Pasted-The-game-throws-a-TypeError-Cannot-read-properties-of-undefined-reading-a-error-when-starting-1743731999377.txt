@@ -1,0 +1,27 @@
+The game throws a `TypeError: Cannot read properties of undefined (reading 'a')` error when starting a new game. The error occurs within the `TetrisBoard` component, specifically after the "game_start" message is received from the server.  The single-player version of the game (github repo: https://github.com/sskenner/traps0) does not have this issue.
+
+**Context:**
+
+*   The error suggests that the `TetrisBoard` component is trying to access a property (likely an array element representing a cell on the board) of an `undefined` variable. This likely happens when the board data is not yet initialized or is not in the expected format.
+*   The multiplayer version uses WebSockets to receive game state updates from the server, while the single-player version manages the game state locally.
+*   The error occurs after the "game_start" message is received, which should trigger the initialization of the board.
+
+**Task:**
+
+1.  **Identify the `TetrisBoard` component file in the `traps` repository.**
+
+2.  **Analyze the `TetrisBoard` component's `render` function and any functions called during rendering.** Look for where the code accesses properties that could be `undefined`, specifically related to the board's grid data.
+
+3.  **Examine the WebSocket message handler for the "game_start" message.**
+    *   Find the code that parses the data received from the server.
+    *   Determine how this data is used to initialize the Tetris board's grid data (e.g., a 2D array).
+    *   Make sure the data is being correctly parsed and transformed into the format expected by the `TetrisBoard` component.
+
+4.  **Compare the board initialization process in the `traps` repository to the `traps0` repository.** Are there differences in how the board data is structured, initialized, or when it's initialized?
+
+5.  **Implement a fix to ensure that the `TetrisBoard` component always receives valid, initialized board data before rendering.** Consider the following approaches:
+    *   **Add a check in the `TetrisBoard`'s `render` function to prevent rendering if the board data is not yet available.** Display a "Loading..." message or a placeholder.
+    *   **Modify the "game_start" message handler to ensure that the board data is correctly initialized before triggering a re-render of the `TetrisBoard` component.**
+    *   **Check for potential race conditions where the `TetrisBoard` attempts to render before the initial board data arrives via WebSocket.**
+
+6.  **After implementing the fix, test the game to ensure that the error is resolved and that the Tetris board renders correctly when starting a new game.**
